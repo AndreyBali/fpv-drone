@@ -1,13 +1,23 @@
 package net.xolt.freecam.mixins;
 
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.xolt.freecam.Freecam;
 import net.xolt.freecam.config.ModConfig;
+import net.minecraft.util.math.Vec3d;
+import net.xolt.freecam.util.FreeCamera;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.xolt.freecam.Freecam.MC;
@@ -30,5 +40,37 @@ public class GameRendererMixin {
             return MC.player;
         }
         return entity;
+    }
+
+    @Shadow @Final private Camera camera;
+
+
+    @Inject(method = "renderWorld", at = @At(
+            value = "INVOKE",
+            // Inject before the call to Camera.update()
+            target = "Lnet/minecraft/client/render/Camera;update(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;ZZF)V",
+            shift = At.Shift.BEFORE
+    ))
+    private void PostCameraUpdate(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo ci) {
+        if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
+            matrix.multiply(getDegreesQuaternion(new Vector3f(1, 0, 0), freeCamera.direction.x, true));
+            matrix.multiply(getDegreesQuaternion(new Vector3f(0, 0, 1), freeCamera.direction.y, true));
+            matrix.multiply(getDegreesQuaternion(new Vector3f(0, 1, 0), freeCamera.direction.z, true));
+        }
+    }
+
+    @Unique
+    public Quaternionf getDegreesQuaternion(Vector3f axis, float rotationAngle, boolean degrees) {
+        if (degrees) {
+            rotationAngle *= 0.017453292F;
+        }
+        Quaternionf quaternion = new Quaternionf();
+
+        float f = (float) Math.sin(rotationAngle / 2.0F);
+        quaternion.x = axis.x * f;
+        quaternion.y = axis.y * f;
+        quaternion.z = axis.z * f;
+        quaternion.w = (float) Math.cos(rotationAngle / 2.0F);
+        return quaternion;
     }
 }

@@ -14,6 +14,8 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.xolt.freecam.config.ModConfig;
+import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.UUID;
 
@@ -197,14 +199,69 @@ public class FreeCamera extends ClientPlayerEntity {
 
     @Override
     public void tickMovement() {
-        if (ModConfig.INSTANCE.movement.flightMode.equals(ModConfig.FlightMode.DEFAULT)) {
-            getAbilities().setFlySpeed(0);
-            Motion.doMotion(this, ModConfig.INSTANCE.movement.horizontalSpeed, ModConfig.INSTANCE.movement.verticalSpeed);
-        } else {
-            getAbilities().setFlySpeed((float) ModConfig.INSTANCE.movement.verticalSpeed / 10);
-        }
+//        if (ModConfig.INSTANCE.movement.flightMode.equals(ModConfig.FlightMode.DEFAULT)) {
+//            getAbilities().setFlySpeed(0);
+//            Motion.doMotion(this, ModConfig.INSTANCE.movement.horizontalSpeed, ModConfig.INSTANCE.movement.verticalSpeed);
+//        } else {
+//            getAbilities().setFlySpeed((float) ModConfig.INSTANCE.movement.verticalSpeed / 10);
+//        }
         super.tickMovement();
-        getAbilities().flying = true;
-        setOnGround(false);
+//        getAbilities().flying = true;
+//        setOnGround(false);
+    }
+
+    public Vector3f direction = new Vector3f();
+    private float pitchInput, yawInput, rollInput, throttleInput;
+
+    private static float multiplier = 3;
+
+
+    @Override
+    public void tick() {
+        super.tick();
+        int jId = 0;
+        if (!GLFW.glfwJoystickPresent(jId)) return;
+        System.out.println("controller: " + GLFW.glfwGetGamepadName(jId));
+//        for (int i = 0; i < 4; i++) {
+//            System.out.println("axis " + i + " " + GLFW.glfwGetJoystickAxes(jId).get(i));
+//        }
+        System.out.println();
+        rollInput = GLFW.glfwGetJoystickAxes(jId).get(3);
+        pitchInput = GLFW.glfwGetJoystickAxes(jId).get(4);
+        yawInput = GLFW.glfwGetJoystickAxes(jId).get(0);
+        throttleInput = GLFW.glfwGetJoystickAxes(jId).get(1);
+        throttleInput += 1;
+//        yawInput *= -1;
+
+        System.out.println("r = " + rollInput);
+        System.out.println("p = " + pitchInput);
+        System.out.println("y = " + yawInput);
+        System.out.println("t = " + throttleInput);
+
+        direction.x += pitchInput * multiplier;
+        direction.y += rollInput * multiplier;
+        direction.z += yawInput * multiplier;
+
+
+
+
+//        Vec3d currentRotation = MC.player.getRotationVecClient();
+//        MC.player.setRotationYawHead((float) ((currentRotation.y + 90) % 360));
+//        MC.roll
+//        MC.player.applyRotation(BlockRotation.)
+        setDirection();
+    }
+
+    private void setDirection() {
+//        direction.x %= 360;
+//        direction.y %= 360;
+//        direction.z %= 360;
+//        if(direction.x < 0) direction.x += 360;
+//        if(direction.y < 0) direction.y += 360;
+//        if(direction.z < 0) direction.z += 360;
+//
+//
+//
+//        this.setRotation(direction.z, direction.x);
     }
 }
