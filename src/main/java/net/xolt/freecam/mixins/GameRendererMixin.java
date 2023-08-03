@@ -1,5 +1,7 @@
 package net.xolt.freecam.mixins;
 
+import com.jme3.math.Quaternion;
+import dev.lazurite.toolbox.api.math.QuaternionHelper;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -45,19 +47,19 @@ public class GameRendererMixin {
     @Shadow private Camera camera;
 
 
-//    @Inject(method = "renderWorld", at = @At(
-//            value = "INVOKE",
-//            // Inject before the call to Camera.update()
-//            target = "Lnet/minecraft/client/render/Camera;update(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;ZZF)V",
-//            shift = At.Shift.BEFORE
-//    ))
-//    private void PostCameraUpdate(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo ci) {
-//        if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
-////            freeCamera.updateFastPosition(tickDelta); //TODO не работает, заставить камеру заапдейтится
-//            var q = freeCamera.getRotation(tickDelta);
-//            matrix.multiply(new Quaternionf(q.getX(), q.getY(), q.getZ(), q.getW()));
-//        }
-//    }
+    @Inject(method = "renderWorld", at = @At(
+            value = "INVOKE",
+            // Inject before the call to Camera.update()
+            target = "Lnet/minecraft/client/render/Camera;update(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;ZZF)V",
+            shift = At.Shift.BEFORE
+    ))
+    private void PostCameraUpdate(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo ci) {
+        if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
+            var q = freeCamera.getRotationF(tickDelta);
+            QuaternionHelper.rotateX(q, -freeCamera.CAMERA_ANGLE);
+            matrix.multiply(q);
+        }
+    }
 
     @Unique
     public Quaternionf getDegreesQuaternion(Vector3f axis, float rotationAngle, boolean degrees) {

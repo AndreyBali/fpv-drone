@@ -36,6 +36,7 @@ import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static net.xolt.freecam.Freecam.MC;
@@ -47,6 +48,8 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         public void sendPacket(Packet<?> packet) {
         }
     };
+
+    public final int CAMERA_ANGLE = 20;
 
     public FreeCamera(int id) {
         this(id, FreecamPosition.getSwimmingPosition(MC.player));
@@ -61,8 +64,8 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         input = new KeyboardInput(MC.options);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
-        this.rigidBody.setMass(1f);
-
+        this.rigidBody.setMass(getMass());
+        this.rigidBody.setDragCoefficient(getDragCoefficient());
     }
 
     public void applyPosition(FreecamPosition position) {
@@ -249,11 +252,11 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //        var pitch = GLFW.glfwGetJoystickAxes(jId).get(4);
 //        var yaw = GLFW.glfwGetJoystickAxes(jId).get(0);
 //        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
-
-        var roll = GLFW.glfwGetJoystickAxes(jId).get(0); //FPV
-        var pitch = GLFW.glfwGetJoystickAxes(jId).get(3);
-        var yaw = GLFW.glfwGetJoystickAxes(jId).get(2);
-        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
+//
+        var throttle = GLFW.glfwGetJoystickAxes(jId).get(0);
+        var roll = GLFW.glfwGetJoystickAxes(jId).get(1); //FPV
+        var pitch = GLFW.glfwGetJoystickAxes(jId).get(2);
+        var yaw = GLFW.glfwGetJoystickAxes(jId).get(3);
 
         throttle += 1;
 
@@ -308,50 +311,21 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         }
     }
 
+
     private float getThrust() {
-        return 65;
+        return 55;
     }
-
     private float getThrustCurve() {
-        return 1f;
+        return 0.8f;
+    }
+    private float getMass() {
+        return 1.2f;
+    }
+    private float getDragCoefficient() {
+        return 0.2f;
     }
 
 
-//    @Override
-//    public void tick() {
-//        super.tick();
-//        int jId = 0;
-//        if (!GLFW.glfwJoystickPresent(jId)) return;
-//        System.out.println("controller: " + GLFW.glfwGetGamepadName(jId));
-////        for (int i = 0; i < 4; i++) {
-////            System.out.println("axis " + i + " " + GLFW.glfwGetJoystickAxes(jId).get(i));
-////        }
-//        System.out.println();
-//        rollInput = GLFW.glfwGetJoystickAxes(jId).get(3);
-//        pitchInput = GLFW.glfwGetJoystickAxes(jId).get(4);
-//        yawInput = GLFW.glfwGetJoystickAxes(jId).get(0);
-//        throttleInput = GLFW.glfwGetJoystickAxes(jId).get(1);
-//        throttleInput += 1;
-////        yawInput *= -1;
-//
-//        System.out.println("r = " + rollInput);
-//        System.out.println("p = " + pitchInput);
-//        System.out.println("y = " + yawInput);
-//        System.out.println("t = " + throttleInput);
-//
-//        direction.x += pitchInput * multiplier;
-//        direction.y += rollInput * multiplier;
-//        direction.z += yawInput * multiplier;
-//
-//
-//
-//
-////        Vec3d currentRotation = MC.player.getRotationVecClient();
-////        MC.player.setRotationYawHead((float) ((currentRotation.y + 90) % 360));
-////        MC.roll
-////        MC.player.applyRotation(BlockRotation.)
-//        setDirection();
-//    }
 
     public void rotate(float x, float y, float z) {
         var rot = new Quaternionf(0, 0, 0, 1);
@@ -398,14 +372,8 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         return QuaternionHelper.getRoll(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
     }
 
-
-
     @Override
     public void updateVelocity(float speed, Vec3d movementInput) {
         super.updateVelocity(speed, movementInput);
-    }
-
-    public void updateFastPosition(float tickDelta) {
-        this.setPosition(getPosition(tickDelta));
     }
 }

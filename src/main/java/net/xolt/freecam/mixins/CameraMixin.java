@@ -128,28 +128,27 @@ public abstract class CameraMixin {
         this.focusedEntity = focusedEntity;
         this.thirdPerson = thirdPerson;
         { //set rotation
-            yaw = freeCamera.getYaw(tickDelta);
-            pitch = freeCamera.getPitch(tickDelta);
 //            roll = freeCamera.getRoll(tickDelta);
-            this.rotation = freeCamera.getRotationF(tickDelta);
-//            this.rotation.rotationYXZ(-yaw * 0.017453292F, pitch * 0.017453292F, roll * 0.017453292F);
-            this.horizontalPlane.set(0.0F, 0.0F, 1.0F).rotate(this.rotation);
-            this.verticalPlane.set(0.0F, 1.0F, 0.0F).rotate(this.rotation);
-            this.diagonalPlane.set(1.0F, 0.0F, 0.0F).rotate(this.rotation);
-
+//            this.rotation = freeCamera.getRotationF(tickDelta);
+////            this.rotation.rotationYXZ(-yaw * 0.017453292F, pitch * 0.017453292F, roll * 0.017453292F);
+//            this.horizontalPlane.set(0.0F, 0.0F, 1.0F).rotate(this.rotation);
+//            this.verticalPlane.set(0.0F, 1.0F, 0.0F).rotate(this.rotation);
+//            this.diagonalPlane.set(1.0F, 0.0F, 0.0F).rotate(this.rotation);
+//            this.setRotation(focusedEntity.getYaw(tickDelta), focusedEntity.getPitch(tickDelta));
+//            this.setRotation(0, 0);
         }
 //        this.setPos(MathHelper.lerp((double) tickDelta, focusedEntity.prevX, focusedEntity.getX()), MathHelper.lerp((double) tickDelta, focusedEntity.prevY, focusedEntity.getY()) + (double) MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY), MathHelper.lerp((double) tickDelta, focusedEntity.prevZ, focusedEntity.getZ()));
         var pos = freeCamera.getPosition(tickDelta);
         this.setPos(pos.x, pos.y, pos.z);
         if (thirdPerson) {
             if (inverseView) {
-                this.setRotation(this.yaw + 180.0F, -this.pitch);
+//                this.setRotation(this.yaw + 180.0F, -this.pitch);
             }
 
             this.moveBy(-this.clipToSpace(4.0), 0.0, 0.0);
         } else if (focusedEntity instanceof LivingEntity && ((LivingEntity) focusedEntity).isSleeping()) {
             Direction direction = ((LivingEntity) focusedEntity).getSleepingDirection();
-            this.setRotation(direction != null ? direction.asRotation() - 180.0F : 0.0F, 0.0F);
+//            this.setRotation(direction != null ? direction.asRotation() - 180.0F : 0.0F, 0.0F);
             this.moveBy(0.0, 0.3, 0.0);
         }
 
