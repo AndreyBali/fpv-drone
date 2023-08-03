@@ -23,6 +23,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.xolt.freecam.BetaflightHelper;
 import net.xolt.freecam.Freecam;
@@ -55,12 +56,13 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         super(MC, MC.world, NETWORK_HANDLER, MC.player.getStatHandler(), MC.player.getRecipeBook(), false, false);
 
         setId(id);
-        applyPosition(position);
+        this.setPosition(position.x, position.y, position.z);
         getAbilities().flying = true;
         input = new KeyboardInput(MC.options);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
         this.rigidBody.setMass(1f);
+
     }
 
     public void applyPosition(FreecamPosition position) {
@@ -243,15 +245,15 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //            System.out.println("axis " + i + " " + GLFW.glfwGetJoystickAxes(jId).get(i));
 //        }
         System.out.println();
-        var roll = GLFW.glfwGetJoystickAxes(jId).get(3); //DOBE
-        var pitch = GLFW.glfwGetJoystickAxes(jId).get(4);
-        var yaw = GLFW.glfwGetJoystickAxes(jId).get(0);
-        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
+//        var roll = GLFW.glfwGetJoystickAxes(jId).get(3); //DOBE
+//        var pitch = GLFW.glfwGetJoystickAxes(jId).get(4);
+//        var yaw = GLFW.glfwGetJoystickAxes(jId).get(0);
+//        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
 
-//        var roll = GLFW.glfwGetJoystickAxes(jId).get(0); //FPV
-//        var pitch = GLFW.glfwGetJoystickAxes(jId).get(1);
-//        var yaw = GLFW.glfwGetJoystickAxes(jId).get(2);
-//        var throttle = GLFW.glfwGetJoystickAxes(jId).get(3);
+        var roll = GLFW.glfwGetJoystickAxes(jId).get(0); //FPV
+        var pitch = GLFW.glfwGetJoystickAxes(jId).get(3);
+        var yaw = GLFW.glfwGetJoystickAxes(jId).get(2);
+        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
 
         throttle += 1;
 
@@ -366,6 +368,11 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         return getPhysicsRotation(new Quaternion(), tickDelta);
     }
 
+    public Quaternionf getRotationF(float tickDelta) {
+        var rot = getRotation(tickDelta);
+        return new Quaternionf(rot.getX(), rot.getY(), rot.getZ(), rot.getW());
+    }
+
 
     private final EntityRigidBody rigidBody = new EntityRigidBody(this);
     @Override
@@ -376,6 +383,22 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     public Vec3d getPosition(float tickDelta) {
         return VectorHelper.toVec3(Convert.toMinecraft(getPhysicsLocation(new Vector3f(), tickDelta)));
     }
+
+    @Override
+    public float getPitch(float tickDelta) {
+        return QuaternionHelper.getPitch(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
+    }
+
+    @Override
+    public float getYaw(float tickDelta) {
+        return QuaternionHelper.getYaw(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
+    }
+
+    public float getRoll(float tickDelta) {
+        return QuaternionHelper.getRoll(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
+    }
+
+
 
     @Override
     public void updateVelocity(float speed, Vec3d movementInput) {
