@@ -1,12 +1,15 @@
 package net.xolt.freecam.util;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import com.jme3.util.TempVars;
 import com.mojang.authlib.GameProfile;
 import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import dev.lazurite.rayon.impl.bullet.collision.body.EntityRigidBody;
+import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.toolbox.api.math.QuaternionHelper;
 import dev.lazurite.toolbox.api.math.VectorHelper;
@@ -16,6 +19,7 @@ import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -64,7 +68,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         input = new KeyboardInput(MC.options);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
-        this.rigidBody.setMass(getMass());
+        this.rigidBody.setMass(0);
         this.rigidBody.setDragCoefficient(getDragCoefficient());
     }
 
@@ -238,16 +242,17 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 
     @Override
     public void tick() {
+
         super.tick();
 
 
         int jId = 0;
         if (!GLFW.glfwJoystickPresent(jId)) return;
-        System.out.println("controller: " + GLFW.glfwGetGamepadName(jId));
+//        System.out.println("controller: " + GLFW.glfwGetGamepadName(jId));
 //        for (int i = 0; i < 4; i++) {
 //            System.out.println("axis " + i + " " + GLFW.glfwGetJoystickAxes(jId).get(i));
 //        }
-        System.out.println();
+//        System.out.println();
 //        var roll = GLFW.glfwGetJoystickAxes(jId).get(3); //DOBE
 //        var pitch = GLFW.glfwGetJoystickAxes(jId).get(4);
 //        var yaw = GLFW.glfwGetJoystickAxes(jId).get(0);
@@ -259,11 +264,13 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         var yaw = GLFW.glfwGetJoystickAxes(jId).get(3);
 
         throttle += 1;
+        yaw *= -1;
 
-        System.out.println("r = " + roll);
-        System.out.println("p = " + pitch);
-        System.out.println("y = " + yaw);
-        System.out.println("t = " + throttle);
+
+//        System.out.println("r = " + roll);
+//        System.out.println("p = " + pitch);
+//        System.out.println("y = " + yaw);
+//        System.out.println("t = " + throttle);
 
 
 
@@ -343,12 +350,155 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     }
 
     public Quaternionf getRotationF(float tickDelta) {
-        var rot = getRotation(tickDelta);
-        return new Quaternionf(rot.getX(), rot.getY(), rot.getZ(), rot.getW());
+        Quaternion q = getRotation(tickDelta);
+        return new Quaternionf(q.getX(), -q.getY(), q.getZ(), -q.getW());
+    }
+
+    public float[] getAngles(Quaternion droneLastRot) {
+
+        Vector3f droneLook = new Vector3f(0, 0, 1);
+        Vector3f droneUp = new Vector3f(0, 1, 0);
+
+        droneLook = droneLastRot.mult(droneLook, new Vector3f());
+        droneUp = droneLastRot.mult(droneUp, new Vector3f());
+        Vector3f droneLeft = droneUp.cross(droneLook);
+
+        Quaternion cameraRot = (new Quaternion()).fromAngleNormalAxis(
+                0,
+                droneLeft.normalize()
+        );
+        Vector3f cameraLook = cameraRot.mult(droneLook, new Vector3f());
+        Vector3f cameraUp = cameraRot.mult(droneUp, new Vector3f());
+
+        float[] droneAngles = getWorldEulerAngles(droneLook, droneUp);
+        float[] cameraAngles = getWorldEulerAngles(cameraLook, cameraUp);
+
+        float[] angles = new float[6];
+        angles[0] = droneAngles[0];
+        angles[1] = droneAngles[1];
+        angles[2] = droneAngles[2];
+        angles[3] = cameraAngles[0];
+        angles[4] = cameraAngles[1];
+        angles[5] = cameraAngles[2];
+
+        return angles;
+    }
+
+    public static float[] getWorldEulerAngles(Vector3f forward, Vector3f up) {
+        float worldYaw = 0;
+        float worldPitch = 0;
+        float worldRoll = 0;
+
+        Vector3f axis = new Vector3f(Float.NaN, Float.NaN, Float.NaN);
+
+        if (forward.x != 0 || forward.z != 0) {
+            // Calc yaw
+            Vector3f forwardProj = new Vector3f(forward.x, 0, forward.z);
+            Quaternion worldYawRot = (new Quaternion());
+            worldYawRot = lookAt(forwardProj, Vector3f.UNIT_Y);
+            worldYaw = toAngleAxis(worldYawRot, axis);
+            worldYaw = worldYaw * axis.y * (float) (180 / Math.PI);
+
+            // Calc pitch
+            Quaternion antiYawRot = worldYawRot.inverse();
+            forwardProj = antiYawRot.mult(forward, new Vector3f());
+            Quaternion worldPitchRot = (new Quaternion());
+            worldPitchRot = lookAt(forwardProj, Vector3f.UNIT_Y);
+            worldPitch = toAngleAxis(worldPitchRot, axis);
+            worldPitch = worldPitch * axis.x * (float) (180 / Math.PI);
+
+            // Calc roll
+            Quaternion rollessRot = (new Quaternion()).fromAngles(
+                    worldPitch *
+                            (float) (Math.PI / 180),
+                    worldYaw * (float) (Math.PI / 180),
+                    0
+            );
+            Vector3f rollessUp = rollessRot.mult(Vector3f.UNIT_Y, new Vector3f());
+            Vector3f crossUps = rollessUp.cross(up).normalize();
+            float lookAngle = angleBetween(crossUps, forward) * (float) (180 / Math.PI);
+            float flip = FastMath.abs(lookAngle) > 90 ? -1 : 1;
+            worldRoll = angleBetween(rollessUp, up) * (float) (180 / Math.PI) * flip;
+        } else if (forward.y > 0) {
+            // looking straight up
+            worldYaw = 0;
+            worldPitch = -90;
+
+            Vector3f upProj = new Vector3f(up.x, 0, up.z);
+            Quaternion rot = (new Quaternion());
+            rot = lookAt(upProj, Vector3f.UNIT_Y);
+            worldRoll = toAngleAxis(rot, axis);
+            worldRoll = worldRoll * axis.y * (float) (180 / Math.PI);
+        } else if (forward.y < 0) {
+            // looking straight down
+            worldYaw = 0;
+            worldPitch = 90;
+
+            Vector3f upProj = new Vector3f(up.x, 0, up.z);
+            Quaternion rot = (new Quaternion());
+            rot = lookAt(upProj, Vector3f.UNIT_Y);
+            worldRoll = toAngleAxis(rot, axis);
+            worldRoll = worldRoll * axis.y * (float) (180 / Math.PI);
+        }
+
+        // worldYaw is backwards in minecraft
+        return new float[]{-worldYaw, worldPitch, worldRoll};
+    }
+
+    public static float angleBetween(Vector3f v1, Vector3f v2) {
+        float dotProduct = v1.dot(v2);
+        float lengthsMultiplied = v1.length() * v2.length();
+        float cosAngle = dotProduct / lengthsMultiplied;
+        return (float) Math.acos(Math.min(Math.max(cosAngle, -1.0f), 1.0f));
     }
 
 
-    private final EntityRigidBody rigidBody = new EntityRigidBody(this);
+    public static Quaternion lookAt(Vector3f direction, Vector3f up) {
+        // Normalize the direction
+        direction = direction.normalize();
+
+        // Compute right vector
+        Vector3f right = up.cross(direction).normalize();
+
+        // Compute orthonormal up vector
+        Vector3f upOrthonormal = direction.cross(right).normalize();
+
+        // Convert these vectors into quaternion
+        Quaternion quaternion = new Quaternion();
+        quaternion.fromAxes(right, upOrthonormal, direction);
+
+        return quaternion;
+    }
+
+
+
+    public static float toAngleAxis(Quaternion q, Vector3f axisStore) {
+        float sqrLength = q.getX() * q.getX() + q.getY() * q.getY() + q.getZ() * q.getZ();
+        float angle;
+        if (sqrLength == 0.0f) {
+            angle = 0.0f;
+            if (axisStore != null) {
+                axisStore.x = 1.0f;
+                axisStore.y = 0.0f;
+                axisStore.z = 0.0f;
+            }
+        } else {
+            angle = (float) (2.0f * Math.acos(q.getW()));
+            if (axisStore != null) {
+                float invLength = (1.0f / FastMath.sqrt(sqrLength));
+                axisStore.x = q.getX() * invLength;
+                axisStore.y = q.getY() * invLength;
+                axisStore.z = q.getZ() * invLength;
+            }
+        }
+
+        return angle;
+    }
+    
+
+
+
+    private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), this.createShape());
     @Override
     public @Nullable EntityRigidBody getRigidBody() {
         return this.rigidBody;

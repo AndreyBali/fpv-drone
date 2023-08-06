@@ -19,6 +19,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL;
+
 public class Freecam implements ClientModInitializer {
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
@@ -190,6 +193,11 @@ public class Freecam implements ClientModInitializer {
         if (ModConfig.INSTANCE.notification.notifyFreecam) {
             MC.player.sendMessage(Text.translatable("msg.freecam.enable"), true);
         }
+    }
+
+    public static boolean debuggerReleaseControl() {
+        GLFW.glfwSetInputMode(MC.getWindow().getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        return true;
     }
 
     private static void onDisableFreecam() {
