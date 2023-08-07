@@ -12,7 +12,6 @@ import net.xolt.freecam.util.FreeCamera;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -20,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.xolt.freecam.Freecam.MC;
-import static net.xolt.freecam.Freecam.debuggerReleaseControl;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
@@ -55,7 +53,7 @@ public class GameRendererMixin {
         if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
             var q = freeCamera.getRotation(tickDelta);
             q.set(q.getX(), -q.getY(), q.getZ(), -q.getW());
-            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), 0/*freeCamera.CAMERA_ANGLE*/)));
+            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), freeCamera.CAMERA_ANGLE)));
 
             var newMat = Convert.toMinecraft(q).get(new Matrix4f());
             newMat.transpose();

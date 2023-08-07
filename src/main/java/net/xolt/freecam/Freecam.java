@@ -58,7 +58,8 @@ public class Freecam implements ClientModInitializer {
                 for (KeyBinding hotbarKey : MC.options.hotbarKeys) {
                     while (hotbarKey.wasPressed()) {
                         resetCamera(hotbarKey.getDefaultKey().getCode());
-                        while (tripodResetBind.wasPressed()) {}
+                        while (tripodResetBind.wasPressed()) {
+                        }
                     }
                 }
             }
@@ -67,12 +68,14 @@ public class Freecam implements ClientModInitializer {
                 for (KeyBinding hotbarKey : MC.options.hotbarKeys) {
                     while (hotbarKey.wasPressed()) {
                         toggleTripod(hotbarKey.getDefaultKey().getCode());
-                        while (freecamBind.wasPressed()) {}
+                        while (freecamBind.wasPressed()) {
+                        }
                     }
                 }
             } else if (freecamBind.wasPressed()) {
                 toggle();
-                while (freecamBind.wasPressed()) {}
+                while (freecamBind.wasPressed()) {
+                }
             }
 
             while (playerControlBind.wasPressed()) {
@@ -106,25 +109,12 @@ public class Freecam implements ClientModInitializer {
         if (keyCode == null) {
             return;
         }
+        if (freecamEnabled) {
+            toggle();
+        }
+        onEnableTripod(keyCode);
+        tripodEnabled = true;
 
-        if (tripodEnabled) {
-            if (activeTripod.equals(keyCode)) {
-                onDisableTripod();
-                tripodEnabled = false;
-            } else {
-                onDisableTripod();
-                onEnableTripod(keyCode);
-            }
-        } else {
-            if (freecamEnabled) {
-                toggle();
-            }
-            onEnableTripod(keyCode);
-            tripodEnabled = true;
-        }
-        if (!tripodEnabled) {
-            onDisabled();
-        }
     }
 
     public static void switchControls() {
@@ -169,18 +159,6 @@ public class Freecam implements ClientModInitializer {
         if (ModConfig.INSTANCE.notification.notifyTripod) {
             MC.player.sendMessage(Text.translatable("msg.freecam.openTripod").append("" + activeTripod % GLFW.GLFW_KEY_0), true);
         }
-    }
-
-    private static void onDisableTripod() {
-        getTripodsForDimension().put(activeTripod, new FreecamPosition(freeCamera));
-        onDisable();
-
-        if (MC.player != null) {
-            if (ModConfig.INSTANCE.notification.notifyTripod) {
-                MC.player.sendMessage(Text.translatable("msg.freecam.closeTripod").append("" + activeTripod % GLFW.GLFW_KEY_0), true);
-            }
-        }
-        activeTripod = null;
     }
 
     private static void onEnableFreecam() {
