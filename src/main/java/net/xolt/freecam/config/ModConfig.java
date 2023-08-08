@@ -4,8 +4,16 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
+import me.shedaniel.autoconfig.util.Utils;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
+import net.minecraft.text.Text;
+import net.xolt.freecam.util.ControllerManager;
+
+import java.util.Collections;
 
 import static me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.EnumHandler.EnumDisplayOption;
 
@@ -15,8 +23,21 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.Excluded
     public static ModConfig INSTANCE;
 
+
     public static void init() {
+
         AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
+        GuiRegistry registry = AutoConfig.getGuiRegistry(ModConfig.class);
+        registry.registerPredicateProvider((s, field, config, defaults, guiProvider) -> {
+            ConfigEntryBuilder ENTRY_BUILDER = ConfigEntryBuilder.create();
+            return Collections.singletonList(ENTRY_BUILDER.startSelector(Text.of("Controller"), ControllerManager.getControllers().toArray(), Utils.getUnsafely(field, config, ControllerManager.getControllers().get(0)))
+                            .setDefaultValue(ControllerManager.getControllers().get(0))
+                            .setSaveConsumer(deviceName -> Utils.setUnsafely(field, config, deviceName))
+                            .build());
+
+
+        }, field -> field.isAnnotationPresent(ConfigEntry.Gui.EnumHandler.class) && field.getType() == String.class);
+
         INSTANCE = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
     }
 
@@ -101,6 +122,21 @@ public class ModConfig implements ConfigData {
         @ConfigEntry.Gui.Tooltip
         public boolean notifyTripod = true;
     }
+
+
+
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.Gui.CollapsibleObject
+    public DroneConfig droneConfig = new DroneConfig();
+    public static class DroneConfig {
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public String device;
+
+
+        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+        public Drones drone = Drones.VOYAGER;
+    }
+
 
     public enum FlightMode implements SelectionListEntry.Translatable {
         CREATIVE("text.autoconfig.freecam.option.movement.flightMode.creative"),

@@ -13,6 +13,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 import net.xolt.freecam.config.ModConfig;
+import net.xolt.freecam.util.ControllerManager;
 import net.xolt.freecam.util.FreeCamera;
 import net.xolt.freecam.util.FreecamPosition;
 import org.lwjgl.glfw.GLFW;
@@ -44,6 +45,7 @@ public class Freecam implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ModConfig.init();
+        ControllerManager.init(ModConfig.INSTANCE);
         freecamBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.freecam.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F4, "category.freecam.freecam"));
         playerControlBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -82,9 +84,9 @@ public class Freecam implements ClientModInitializer {
                 switchControls();
             }
 
-            while (configGuiBind.wasPressed()) {
-                MC.setScreen(AutoConfig.getConfigScreen(ModConfig.class, MC.currentScreen).get());
-            }
+//            while (configGuiBind.wasPressed()) {
+//                MC.setScreen(AutoConfig.getConfigScreen(ModConfig.class, MC.currentScreen).get());
+//            }
         });
     }
 
@@ -156,21 +158,17 @@ public class Freecam implements ClientModInitializer {
         MC.setCameraEntity(freeCamera);
         activeTripod = keyCode;
 
-        if (ModConfig.INSTANCE.notification.notifyTripod) {
-            MC.player.sendMessage(Text.translatable("msg.freecam.openTripod").append("" + activeTripod % GLFW.GLFW_KEY_0), true);
-        }
     }
 
     private static void onEnableFreecam() {
         onEnable();
         freeCamera = new FreeCamera(-420);
-        freeCamera.applyPerspective(ModConfig.INSTANCE.visual.perspective, ModConfig.INSTANCE.collision.alwaysCheck || !ModConfig.INSTANCE.collision.ignoreAll);
         freeCamera.spawn();
         MC.setCameraEntity(freeCamera);
 
-        if (ModConfig.INSTANCE.notification.notifyFreecam) {
-            MC.player.sendMessage(Text.translatable("msg.freecam.enable"), true);
-        }
+//        if (ModConfig.INSTANCE.notification.notifyFreecam) {
+//            MC.player.sendMessage(Text.translatable("msg.freecam.enable"), true);
+//        }
     }
 
     public static boolean debuggerReleaseControl() {
@@ -182,15 +180,15 @@ public class Freecam implements ClientModInitializer {
         onDisable();
 
         if (MC.player != null) {
-            if (ModConfig.INSTANCE.notification.notifyFreecam) {
-                MC.player.sendMessage(Text.translatable("msg.freecam.disable"), true);
-            }
+//            if (ModConfig.INSTANCE.notification.notifyFreecam) {
+//                MC.player.sendMessage(Text.translatable("msg.freecam.disable"), true);
+//            }
         }
     }
 
     private static void onEnable() {
         MC.chunkCullingEnabled = false;
-        MC.gameRenderer.setRenderHand(ModConfig.INSTANCE.visual.showHand);
+        MC.gameRenderer.setRenderHand(false);
 
         rememberedF5 = MC.options.getPerspective();
         if (MC.gameRenderer.getCamera().isThirdPerson()) {

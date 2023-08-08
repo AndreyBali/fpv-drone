@@ -28,7 +28,6 @@ import net.xolt.freecam.config.ModConfig;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.UUID;
 
@@ -63,7 +62,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 
     // Mutate the position and rotation based on perspective
     // If checkCollision is true, move as far as possible without colliding
-    public void applyPerspective(ModConfig.Perspective perspective, boolean checkCollision) {}
+//    public void applyPerspective(ModConfig.Perspective perspective, boolean checkCollision) {}
 
     public void spawn() {
         if (clientWorld != null) {
@@ -109,7 +108,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     // Prevents pistons from moving FreeCamera when collision.ignoreAll is enabled.
     @Override
     public PistonBehavior getPistonBehavior() {
-        return ModConfig.INSTANCE.collision.ignoreAll ? PistonBehavior.IGNORE : PistonBehavior.NORMAL;
+        return /*ModConfig.INSTANCE.collision.ignoreAll ? PistonBehavior.IGNORE :*/ PistonBehavior.NORMAL;
     }
 
     // Ensures that the FreeCamera is always in the swimming pose.
@@ -120,40 +119,13 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 
     @Override
     public void tick() {
-
         super.tick();
 
-
-        int jId = 0;
-        if (!GLFW.glfwJoystickPresent(jId)) return;
-//        System.out.println("controller: " + GLFW.glfwGetGamepadName(jId));
-//        for (int i = 0; i < 4; i++) {
-//            System.out.println("axis " + i + " " + GLFW.glfwGetJoystickAxes(jId).get(i));
-//        }
-//        System.out.println();
-//        var roll = GLFW.glfwGetJoystickAxes(jId).get(3); //DOBE
-//        var pitch = GLFW.glfwGetJoystickAxes(jId).get(4);
-//        var yaw = GLFW.glfwGetJoystickAxes(jId).get(0);
-//        var throttle = GLFW.glfwGetJoystickAxes(jId).get(1);
-//
-        var throttle = GLFW.glfwGetJoystickAxes(jId).get(0);
-        var roll = GLFW.glfwGetJoystickAxes(jId).get(1); //FPV
-        var pitch = GLFW.glfwGetJoystickAxes(jId).get(2);
-        var yaw = GLFW.glfwGetJoystickAxes(jId).get(3);
-
-        throttle += 1;
-        yaw *= -1;
-
-
-//        System.out.println("r = " + roll);
-//        System.out.println("p = " + pitch);
-//        System.out.println("y = " + yaw);
-//        System.out.println("t = " + throttle);
-
-//        var pitch = player.quadz$getJoystickValue(new ResourceLocation(Quadz.MODID, "pitch"));
-//        var yaw = -1 * player.quadz$getJoystickValue(new ResourceLocation(Quadz.MODID, "yaw"));
-//        var roll = player.quadz$getJoystickValue(new ResourceLocation(Quadz.MODID, "roll"));
-//        var throttle = player.quadz$getJoystickValue(new ResourceLocation(Quadz.MODID, "throttle")) + 1.0f;
+        ControllerManager.updateControllerAxis();
+        float throttle = ControllerManager.throttle + 1;
+        float roll = ControllerManager.roll;
+        float pitch = ControllerManager.pitch;
+        float yaw = ControllerManager.yaw * -1;
 
         var rate = 0.7f;
         var superRate = 0.8f;
@@ -195,41 +167,21 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     }
 
 
-//    private float getThrust() {
-//        return 55;
-//    }
-//    private float getThrustCurve() {
-//        return 0.8f;
-//    }
-//    private float getMass() {
-//        return 1.2f;
-//    }
-//    private float getDragCoefficient() {
-//        return 0.2f;
-//    }
-//    public int CAMERA_ANGLE = 20;
-//    private double width = 0.9f;
-//    private double height = 0.2f;
-
     private float getThrust() {
-        return 65;
+        return ModConfig.INSTANCE.droneConfig.drone.thrust;
     }
     private float getThrustCurve() {
-        return 1.0f;
+        return ModConfig.INSTANCE.droneConfig.drone.thrustCurve;
     }
     private float getMass() {
-        return 0.5f;
+        return ModConfig.INSTANCE.droneConfig.drone.mass;
     }
     private float getDragCoefficient() {
-        return 0.135f;
+        return ModConfig.INSTANCE.droneConfig.drone.dragCoefficient;
     }
-    public int CAMERA_ANGLE = 45;
-    private double width = 0.55;
-    private double height = 0.3;
-
-
-
-
+    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.drone.cameraAngle;
+    private final double width = ModConfig.INSTANCE.droneConfig.drone.width;
+    private final double height = ModConfig.INSTANCE.droneConfig.drone.height;
 
     public void rotate(float x, float y, float z) {
         var rot = new Quaternionf(0, 0, 0, 1);
