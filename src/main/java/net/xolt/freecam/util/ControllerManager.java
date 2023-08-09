@@ -1,5 +1,6 @@
 package net.xolt.freecam.util;
 
+import net.minecraft.client.Mouse;
 import net.xolt.freecam.Freecam;
 import net.xolt.freecam.config.ModConfig;
 import org.lwjgl.glfw.GLFW;
@@ -7,6 +8,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static net.xolt.freecam.Freecam.MC;
 
 public class ControllerManager {
 
@@ -51,11 +54,7 @@ public class ControllerManager {
             config.droneConfig.device = controllers.get(0);
         }
         if (config.droneConfig.device.equals("keyboard")) {
-            //TODO keyboard handling
-            throttle = 0;
-            roll = 0;
-            pitch = 0;
-            yaw = 0;
+            handleKeyboardInput();
             return;
         }
 
@@ -64,5 +63,31 @@ public class ControllerManager {
         roll = GLFW.glfwGetJoystickAxes(jId).get(1);
         pitch = GLFW.glfwGetJoystickAxes(jId).get(2);
         yaw = GLFW.glfwGetJoystickAxes(jId).get(3);
+    }
+
+
+    private static float lastMouseX = 0;
+    private static float lastMouseY = 0;
+
+    private static void handleKeyboardInput() {
+        if(MC.options.forwardKey.isPressed()) throttle = 0.7f;
+        else if(MC.options.backKey.isPressed()) throttle = -0.7f;
+        else throttle = 0;
+
+        if(MC.options.rightKey.isPressed()) yaw = 0.5f;
+        else if(MC.options.leftKey.isPressed()) yaw = -0.5f;
+        else yaw = 0;
+
+        if(MC.currentScreen == null) {
+            Mouse mouse = MC.mouse;
+            float mouseX = (float) mouse.getX();
+            float mouseY = (float) mouse.getY();
+            float sensitivity = MC.options.getMouseSensitivity().getValue().floatValue();
+
+            roll =  (mouseX - lastMouseX) * sensitivity * 0.01f;
+            pitch = (mouseY - lastMouseY) * sensitivity * 0.01f * (config.droneConfig.invertMousePitchWhileFlying ? -1 : 1);
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+        }
     }
 }

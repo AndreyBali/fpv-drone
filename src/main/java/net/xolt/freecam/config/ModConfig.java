@@ -132,9 +132,12 @@ public class ModConfig implements ConfigData {
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         public String device;
 
-
         @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
         public Drones drone = Drones.VOYAGER;
+
+        public boolean pauseOnMenu = true;
+        public boolean invertMousePitchWhileFlying = true;
+
     }
 
 

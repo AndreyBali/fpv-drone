@@ -14,6 +14,7 @@ import dev.lazurite.toolbox.api.math.QuaternionHelper;
 import dev.lazurite.toolbox.api.math.VectorHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -120,6 +121,11 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     @Override
     public void tick() {
         super.tick();
+        if(ModConfig.INSTANCE.droneConfig.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
+            rigidBody.setMass(0);
+            return;
+        }
+        rigidBody.setMass(getMass());
 
         ControllerManager.updateControllerAxis();
         float throttle = ControllerManager.throttle + 1;
