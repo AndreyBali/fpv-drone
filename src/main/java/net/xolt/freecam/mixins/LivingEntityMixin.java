@@ -18,14 +18,6 @@ public abstract class LivingEntityMixin {
     @Shadow
     public abstract float getHealth();
 
-    // Allows for the horizontal speed of creative flight to be configured separately from vertical speed.
-    @Inject(method = "getMovementSpeed(F)F", at = @At("HEAD"), cancellable = true)
-    private void onGetMovementSpeed(CallbackInfoReturnable<Float> cir) {
-        if (Freecam.isEnabled() && ModConfig.INSTANCE.movement.flightMode.equals(ModConfig.FlightMode.CREATIVE) && this.equals(Freecam.getFreeCamera())) {
-            cir.setReturnValue((float) (ModConfig.INSTANCE.movement.horizontalSpeed / 10) * (Freecam.getFreeCamera().isSprinting() ? 2 : 1));
-        }
-    }
-
     // Disables freecam upon receiving damage if disableOnDamage is enabled.
     @Inject(method = "setHealth", at = @At("HEAD"))
     private void onSetHealth(float health, CallbackInfo ci) {

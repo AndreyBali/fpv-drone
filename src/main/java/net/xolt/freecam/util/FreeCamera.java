@@ -36,6 +36,16 @@ import static net.xolt.freecam.Freecam.MC;
 
 public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsElement {
 
+    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.drone.cameraAngle;
+    private final double width = ModConfig.INSTANCE.droneConfig.drone.width;
+    private final double height = ModConfig.INSTANCE.droneConfig.drone.height;
+    private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
+
+//    private int tickCounter = 0;
+//    private long createdAt = 0;
+//    private final ReplayModHelper replayModHelper = new ReplayModHelper();
+
+
     private static final ClientPlayNetworkHandler NETWORK_HANDLER = new ClientPlayNetworkHandler(MC, MC.currentScreen, MC.getNetworkHandler().getConnection(), MC.getCurrentServerEntry(), new GameProfile(UUID.randomUUID(), "FreeCamera"), MC.getTelemetryManager().createWorldSession(false, null, null)) {
         @Override
         public void sendPacket(Packet<?> packet) {
@@ -61,11 +71,6 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //        createdAt = System.currentTimeMillis();
     }
 
-
-    // Mutate the position and rotation based on perspective
-    // If checkCollision is true, move as far as possible without colliding
-//    public void applyPerspective(ModConfig.Perspective perspective, boolean checkCollision) {}
-
     public void spawn() {
         if (clientWorld != null) {
             clientWorld.addEntity(getId(), this);
@@ -78,27 +83,6 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         }
 //        System.out.println(replayModHelper.getJson());
     }
-
-    // Prevents fall damage sound when FreeCamera touches ground with noClip disabled.
-    @Override
-    protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
-    }
-
-    // Prevents pistons from moving FreeCamera when collision.ignoreAll is enabled.
-    @Override
-    public PistonBehavior getPistonBehavior() {
-        return /*ModConfig.INSTANCE.collision.ignoreAll ? PistonBehavior.IGNORE :*/ PistonBehavior.NORMAL;
-    }
-
-    // Ensures that the FreeCamera is always in the swimming pose.
-    @Override
-    public void setPose(EntityPose pose) {
-        super.setPose(EntityPose.SWIMMING);
-    }
-
-//    private int tickCounter = 0;
-//    private long createdAt = 0;
-//    private final ReplayModHelper replayModHelper = new ReplayModHelper();
 
     @Override
     public void tick() {
@@ -161,7 +145,6 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //        }
     }
 
-
     private float getThrust() {
         return ModConfig.INSTANCE.droneConfig.drone.thrust;
     }
@@ -177,10 +160,9 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     private float getDragCoefficient() {
         return ModConfig.INSTANCE.droneConfig.drone.dragCoefficient;
     }
-
-    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.drone.cameraAngle;
-    private final double width = ModConfig.INSTANCE.droneConfig.drone.width;
-    private final double height = ModConfig.INSTANCE.droneConfig.drone.height;
+    private MinecraftShape getShape() {
+        return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));
+    }
 
     public void rotate(float x, float y, float z) {
         var rot = new Quaternionf(0, 0, 0, 1);
@@ -197,33 +179,25 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         return getPhysicsRotation(new Quaternion(), tickDelta);
     }
 
-    private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
-
-    private MinecraftShape getShape() {
-        return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));
-    }
-
-    @Override
-    public @Nullable EntityRigidBody getRigidBody() {
-        return this.rigidBody;
-    }
-
     public Vec3d getPosition(float tickDelta) {
         return VectorHelper.toVec3(Convert.toMinecraft(getPhysicsLocation(new Vector3f(), tickDelta)));
     }
 
     @Override
-    public float getPitch(float tickDelta) {
-        return QuaternionHelper.getPitch(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
+    public void updateVelocity(float speed, Vec3d movementInput) {}
+    @Override
+    public @Nullable EntityRigidBody getRigidBody() {
+        return this.rigidBody;
     }
 
+    // Prevents fall damage sound when FreeCamera touches ground with noClip disabled.
     @Override
-    public float getYaw(float tickDelta) {
-        return QuaternionHelper.getYaw(Convert.toMinecraft(getPhysicsRotation(new Quaternion(), tickDelta)));
+    protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
+    }
+    // Ensures that the FreeCamera is always in the swimming pose.
+    @Override
+    public void setPose(EntityPose pose) {
+        super.setPose(EntityPose.SWIMMING);
     }
 
-    @Override
-    public void updateVelocity(float speed, Vec3d movementInput) {
-        super.updateVelocity(speed, movementInput);
-    }
 }

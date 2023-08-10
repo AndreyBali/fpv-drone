@@ -16,6 +16,5 @@ public class ClientConnectionMixin {
         if (Freecam.isEnabled()) {
             Freecam.toggle();
         }
-        Freecam.clearTripods();
     }
 }
