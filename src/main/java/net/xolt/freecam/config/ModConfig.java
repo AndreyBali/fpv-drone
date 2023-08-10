@@ -138,6 +138,14 @@ public class ModConfig implements ConfigData {
         public boolean pauseOnMenu = true;
         public boolean invertMousePitchWhileFlying = true;
 
+//        @ConfigEntry.Gui.CollapsibleObject
+//        public ReplayMod replayMod = new ReplayMod();
+//
+//        public static class ReplayMod {
+//            public boolean record = false;
+//            @ConfigEntry.BoundedDiscrete(max = 20, min = 1)
+//            public int everyXTick = 3;
+//        }
     }
 
 

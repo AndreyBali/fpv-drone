@@ -51,13 +51,14 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 
         setId(id);
         this.setPosition(position.x, position.y, position.z);
-        this.setRotation(0,0);
+        this.setRotation(0, 0);
         getAbilities().flying = true;
         input = new KeyboardInput(MC.options);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
         this.rigidBody.setMass(getMass());
         this.rigidBody.setDragCoefficient(getDragCoefficient());
+//        createdAt = System.currentTimeMillis();
     }
 
 
@@ -75,35 +76,12 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         if (clientWorld != null && clientWorld.getEntityById(getId()) != null) {
             clientWorld.removeEntity(getId(), RemovalReason.DISCARDED);
         }
+//        System.out.println(replayModHelper.getJson());
     }
 
     // Prevents fall damage sound when FreeCamera touches ground with noClip disabled.
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
-    }
-
-    // Needed for hand swings to be shown in freecam since the player is replaced by FreeCamera in HeldItemRenderer.renderItem()
-    @Override
-    public float getHandSwingProgress(float tickDelta) {
-        return MC.player.getHandSwingProgress(tickDelta);
-    }
-
-    // Needed for item use animations to be shown in freecam since the player is replaced by FreeCamera in HeldItemRenderer.renderItem()
-    @Override
-    public int getItemUseTimeLeft() {
-        return MC.player.getItemUseTimeLeft();
-    }
-
-    // Also needed for item use animations to be shown in freecam.
-    @Override
-    public boolean isUsingItem() {
-        return MC.player.isUsingItem();
-    }
-
-    // Makes night vision apply to FreeCamera when Iris is enabled.
-    @Override
-    public StatusEffectInstance getStatusEffect(StatusEffect effect) {
-        return MC.player.getStatusEffect(effect);
     }
 
     // Prevents pistons from moving FreeCamera when collision.ignoreAll is enabled.
@@ -118,10 +96,14 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         super.setPose(EntityPose.SWIMMING);
     }
 
+//    private int tickCounter = 0;
+//    private long createdAt = 0;
+//    private final ReplayModHelper replayModHelper = new ReplayModHelper();
+
     @Override
     public void tick() {
         super.tick();
-        if(ModConfig.INSTANCE.droneConfig.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
+        if (ModConfig.INSTANCE.droneConfig.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
             rigidBody.setMass(0);
             return;
         }
@@ -170,21 +152,32 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         } else {
             FreeCamera.LOGGER.warn("Infinite thrust force!");
         }
+
+//        if (ModConfig.INSTANCE.droneConfig.replayMod.record) {
+//            if (tickCounter++ >= ModConfig.INSTANCE.droneConfig.replayMod.everyXTick) {
+//                tickCounter = 0;
+//                replayModHelper.add(createdAt, CAMERA_ANGLE, getRotation(0), getPosition(0));
+//            }
+//        }
     }
 
 
     private float getThrust() {
         return ModConfig.INSTANCE.droneConfig.drone.thrust;
     }
+
     private float getThrustCurve() {
         return ModConfig.INSTANCE.droneConfig.drone.thrustCurve;
     }
+
     private float getMass() {
         return ModConfig.INSTANCE.droneConfig.drone.mass;
     }
+
     private float getDragCoefficient() {
         return ModConfig.INSTANCE.droneConfig.drone.dragCoefficient;
     }
+
     public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.drone.cameraAngle;
     private final double width = ModConfig.INSTANCE.droneConfig.drone.width;
     private final double height = ModConfig.INSTANCE.droneConfig.drone.height;
@@ -206,9 +199,10 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 
     private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
 
-   private MinecraftShape getShape(){
-       return MinecraftShape.convex(new Box(0,0,0,  width,height,width));
-   }
+    private MinecraftShape getShape() {
+        return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));
+    }
+
     @Override
     public @Nullable EntityRigidBody getRigidBody() {
         return this.rigidBody;

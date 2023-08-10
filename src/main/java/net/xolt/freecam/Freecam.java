@@ -4,6 +4,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.input.KeyboardInput;
@@ -41,6 +42,7 @@ public class Freecam implements ClientModInitializer {
     private static HashMap<Integer, FreecamPosition> nether_tripods = new HashMap<>();
     private static HashMap<Integer, FreecamPosition> end_tripods = new HashMap<>();
     private static Perspective rememberedF5 = null;
+    public static long joinTime = 0;
 
     @Override
     public void onInitializeClient() {
@@ -54,7 +56,7 @@ public class Freecam implements ClientModInitializer {
                 "key.freecam.tripodReset", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.freecam.freecam"));
         configGuiBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.freecam.configGui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.freecam.freecam"));
-
+        ClientPlayConnectionEvents.INIT.register((handler, client) -> joinTime = System.currentTimeMillis());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (tripodResetBind.isPressed()) {
                 for (KeyBinding hotbarKey : MC.options.hotbarKeys) {
