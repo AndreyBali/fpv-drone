@@ -3,7 +3,6 @@
   "package": "net.andreyabli.fpvdrone.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "AbstractBlockStateMixin",
     "BubbleColumnSoundPlayerMixin",
     "CameraMixin",
     "ClientConnectionMixin",

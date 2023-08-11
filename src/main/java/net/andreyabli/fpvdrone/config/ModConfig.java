@@ -9,16 +9,13 @@ import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.util.Utils;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.andreyabli.fpvdrone.util.ControllerManager;
 import net.minecraft.text.Text;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.EnumHandler.EnumDisplayOption;
-
-@Config(name = "fpv-drone")
+@Config(name = "fpvdrone")
 public class ModConfig implements ConfigData {
 
     @ConfigEntry.Gui.Excluded
@@ -28,17 +25,6 @@ public class ModConfig implements ConfigData {
     public static void init() {
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
         GuiRegistry registry = AutoConfig.getGuiRegistry(ModConfig.class);
-        registry.registerPredicateProvider((s, field, config, defaults, guiProvider) -> {
-            ConfigEntryBuilder ENTRY_BUILDER = ConfigEntryBuilder.create();
-            return Collections.singletonList(ENTRY_BUILDER.startSelector(
-                            Text.of("Controller"),
-                            ControllerManager.getControllers().toArray(),
-                            Utils.getUnsafely(field, config, ControllerManager.getControllers().get(0))
-                    )
-                            .setDefaultValue(ControllerManager.getControllers().get(0))
-                            .setSaveConsumer(deviceName -> Utils.setUnsafely(field, config, deviceName))
-                            .build());
-        }, field -> field.isAnnotationPresent(ConfigEntry.Gui.EnumHandler.class) && field.getType() == String.class);
 
         registry.registerTypeProvider((String i13n, Field field, Object config, Object defaults, GuiRegistryAccess guiRegistry) -> {
             return Collections.singletonList(
@@ -68,23 +54,6 @@ public class ModConfig implements ConfigData {
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.Gui.CollapsibleObject
-    public CollisionConfig collision = new CollisionConfig();
-    public static class CollisionConfig {
-        @ConfigEntry.Gui.Tooltip
-        public boolean ignoreTransparent = true;
-
-        @ConfigEntry.Gui.Tooltip
-        public boolean ignoreOpenable = true;
-
-        @ConfigEntry.Gui.Tooltip(count = 2)
-        public boolean ignoreAll = true;
-
-        @ConfigEntry.Gui.Tooltip(count = 2)
-        public boolean alwaysCheck = false;
-    }
-
-    @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.Gui.CollapsibleObject
     public VisualConfig visual = new VisualConfig();
     public static class VisualConfig {
         @ConfigEntry.Gui.Tooltip
@@ -94,7 +63,7 @@ public class ModConfig implements ConfigData {
         public boolean showHand = false;
 
         @ConfigEntry.Gui.Tooltip
-        public boolean showSubmersion = false;
+        public boolean showSubmersion = true;
     }
 
     @ConfigEntry.Gui.Tooltip
@@ -109,10 +78,6 @@ public class ModConfig implements ConfigData {
 
         @ConfigEntry.Gui.Tooltip(count = 2)
         public boolean allowInteract = false;
-
-        @ConfigEntry.Gui.Tooltip
-        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
-        public InteractionMode interactionMode = InteractionMode.CAMERA;
     }
 
     @ConfigEntry.Gui.Tooltip
@@ -135,8 +100,8 @@ public class ModConfig implements ConfigData {
 
         public List<Drone> drones = new ArrayList<>(Arrays.asList(
                 new Drone("Pixel", 0.225, 0.125, 0.01, 0.05, 0.4, 1, 5),
-                new Drone("Voyager", 0.55, 0.3, 0.5, 0.135, 65, 1, 45),
-                new Drone("Voxel racer one", 0.9, 0.2, 1.2, 0.2, 55, 0.8, 20)
+                new Drone("Voyager", 0.9, 0.2, 1.2, 0.2, 55, 0.8, 20),
+                new Drone("Voxel racer one", 0.55, 0.3, 0.5, 0.135, 65, 1, 45)
         ));
 
         public SelectableDrone drone = new SelectableDrone(drones);
@@ -179,21 +144,5 @@ public class ModConfig implements ConfigData {
 //            @ConfigEntry.BoundedDiscrete(max = 20, min = 1)
 //            public int everyXTick = 3;
 //        }
-    }
-
-
-    public enum InteractionMode implements SelectionListEntry.Translatable {
-        CAMERA("text.autoconfig.freecam.option.utility.interactionMode.camera"),
-        PLAYER("text.autoconfig.freecam.option.utility.interactionMode.player");
-
-        private final String name;
-
-        InteractionMode(String name) {
-            this.name = name;
-        }
-
-        public String getKey() {
-            return name;
-        }
     }
 }

@@ -29,15 +29,6 @@ public class GameRendererMixin {
         }
     }
 
-    // Makes mouse clicks come from the player rather than the freecam entity when player control is enabled or if interaction mode is set to player.
-    @ModifyVariable(method = "updateTargetedEntity", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
-    private Entity onUpdateTargetedEntity(Entity entity) {
-        if (Freecam.isEnabled() && (Freecam.isPlayerControlEnabled() || ModConfig.INSTANCE.utility.interactionMode.equals(ModConfig.InteractionMode.PLAYER))) {
-            return Freecam.MC.player;
-        }
-        return entity;
-    }
-
     @Shadow private Camera camera;
 
 
