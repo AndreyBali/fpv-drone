@@ -24,7 +24,6 @@ public class Freecam implements ClientModInitializer {
     public static final MinecraftClient MC = MinecraftClient.getInstance();
 
     private static KeyBinding freecamBind;
-    private static KeyBinding tripodResetBind;
     private static KeyBinding configGuiBind;
     private static boolean freecamEnabled = false;
     private static boolean playerControlEnabled = false;
@@ -39,8 +38,6 @@ public class Freecam implements ClientModInitializer {
         ControllerManager.init(ModConfig.INSTANCE);
         freecamBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.freecam.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F4, "category.freecam.freecam"));
-        tripodResetBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.freecam.tripodReset", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.freecam.freecam"));
         configGuiBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.freecam.configGui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.freecam.freecam"));
 //        ClientPlayConnectionEvents.INIT.register((handler, client) -> joinTime = System.currentTimeMillis());
@@ -124,14 +121,6 @@ public class Freecam implements ClientModInitializer {
 
     public static FreeCamera getFreeCamera() {
         return freeCamera;
-    }
-
-    public static KeyBinding getFreecamBind() {
-        return freecamBind;
-    }
-
-    public static KeyBinding getTripodResetBind() {
-        return tripodResetBind;
     }
 
     public static boolean disableNextTick() {
