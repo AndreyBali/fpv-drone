@@ -78,6 +78,8 @@ public class ModConfig implements ConfigData {
 
         @ConfigEntry.Gui.Tooltip(count = 2)
         public boolean allowInteract = false;
+        public boolean pauseOnMenu = true;
+        public boolean flyAsPlayer = true;
     }
 
     @ConfigEntry.Gui.Tooltip
@@ -89,13 +91,54 @@ public class ModConfig implements ConfigData {
     }
 
 
+    @ConfigEntry.Gui.CollapsibleObject
+    public Controls controls = new Controls();
+    public static class Controls {
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public SelectableDevice device = new SelectableDevice();
+        @ConfigEntry.BoundedDiscrete(min = -1, max = 2) public float rate = 0.7f;
+        @ConfigEntry.BoundedDiscrete(min = -1, max = 2) public float superRate = 0.9f;
+        @ConfigEntry.BoundedDiscrete(min = -1, max = 2)  public float expo = 0.1f;
+        public boolean invertMousePitchWhileFlying = true;
+        @ConfigEntry.Gui.CollapsibleObject
+        public Keyboard keyboard = new Keyboard();
+
+
+        public static class Keyboard {
+            @ConfigEntry.BoundedDiscrete(min = -1, max = 1)
+            public float forwardKeyThrottle = 0.7f;
+            @ConfigEntry.BoundedDiscrete(min = -1, max = 1)
+            public float backKeyThrottle = -0.7f;
+            @ConfigEntry.BoundedDiscrete(min = -1, max = 1)
+            public float rightKeyYaw = -0.5f;
+            @ConfigEntry.BoundedDiscrete(min = -1, max = 1)
+            public float leftKeyYaw = 0.5f;
+        }
+
+        @ConfigEntry.Gui.CollapsibleObject
+        public Controller controller = new Controller();
+        public static class Controller {
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            public int throttleChannel = 0;
+            public boolean invertThrottle = false;
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            public int rollChannel = 1;
+            public boolean invertRoll = false;
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            public int pitchChannel = 2;
+            public boolean invertPitch = false;
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            public int yawChannel = 3;
+            public boolean invertYaw = true;
+        }
+    }
+
+
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.Gui.CollapsibleObject
     public DroneConfig droneConfig = new DroneConfig();
     public static class DroneConfig {
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        public SelectableDevice device = new SelectableDevice();
 
 
         public List<Drone> drones = new ArrayList<>(Arrays.asList(
@@ -133,9 +176,8 @@ public class ModConfig implements ConfigData {
             }
         }
 
-        public boolean pauseOnMenu = true;
-        public boolean invertMousePitchWhileFlying = true;
 
+    }
 //        @ConfigEntry.Gui.CollapsibleObject
 //        public ReplayMod replayMod = new ReplayMod();
 //
@@ -144,5 +186,4 @@ public class ModConfig implements ConfigData {
 //            @ConfigEntry.BoundedDiscrete(max = 20, min = 1)
 //            public int everyXTick = 3;
 //        }
-    }
 }

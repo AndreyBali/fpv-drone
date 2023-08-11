@@ -85,21 +85,24 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     @Override
     public void tick() {
         super.tick();
-        if (ModConfig.INSTANCE.droneConfig.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
+        if (ModConfig.INSTANCE.utility.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
             rigidBody.setMass(0);
             return;
         }
         rigidBody.setMass(getMass());
+        if(MinecraftClient.getInstance().player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
+            MC.player.copyPositionAndRotation(this);
+        }
 
         ControllerManager.updateControllerAxis();
         float throttle = ControllerManager.throttle + 1;
         float roll = ControllerManager.roll;
         float pitch = ControllerManager.pitch;
-        float yaw = ControllerManager.yaw * -1;
+        float yaw = ControllerManager.yaw;
 
-        var rate = 0.7f;
-        var superRate = 0.8f;
-        var expo = 0.0f;
+        var rate = ModConfig.INSTANCE.controls.rate;
+        var superRate = ModConfig.INSTANCE.controls.superRate;
+        var expo = ModConfig.INSTANCE.controls.expo;
 
         this.rotate(
                 (float) BetaflightHelper.calculateRates(pitch, rate, expo, superRate, 0.05f),

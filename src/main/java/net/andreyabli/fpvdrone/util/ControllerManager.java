@@ -48,16 +48,16 @@ public class ControllerManager {
             updateControllers();
             nextControllerCheck = System.currentTimeMillis() + 500;
         }
-        if (config.droneConfig.device.getSelectedString().equals("keyboard")) {
+        if (config.controls.device.getSelectedString().equals("keyboard")) {
             handleKeyboardInput();
             return;
         }
 
-        int jId = controllerIds.get(config.droneConfig.device.getSelectedString());
-        throttle = GLFW.glfwGetJoystickAxes(jId).get(0);
-        roll = GLFW.glfwGetJoystickAxes(jId).get(1);
-        pitch = GLFW.glfwGetJoystickAxes(jId).get(2);
-        yaw = GLFW.glfwGetJoystickAxes(jId).get(3);
+        int jId = controllerIds.get(config.controls.device.getSelectedString());
+        throttle = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.throttleChannel) * (config.controls.controller.invertThrottle ? -1 : 1);
+        roll = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.rollChannel) * (config.controls.controller.invertRoll ? -1 : 1);
+        pitch = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.pitchChannel) * (config.controls.controller.invertPitch ? -1 : 1);
+        yaw = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.yawChannel) * (config.controls.controller.invertYaw ? -1 : 1);
     }
 
 
@@ -65,12 +65,12 @@ public class ControllerManager {
     private static float lastMouseY = 0;
 
     private static void handleKeyboardInput() {
-        if(Freecam.MC.options.forwardKey.isPressed()) throttle = 0.7f;
-        else if(Freecam.MC.options.backKey.isPressed()) throttle = -0.7f;
+        if(Freecam.MC.options.forwardKey.isPressed()) throttle = config.controls.keyboard.forwardKeyThrottle;
+        else if(Freecam.MC.options.backKey.isPressed()) throttle = config.controls.keyboard.backKeyThrottle;
         else throttle = 0;
 
-        if(Freecam.MC.options.rightKey.isPressed()) yaw = 0.5f;
-        else if(Freecam.MC.options.leftKey.isPressed()) yaw = -0.5f;
+        if(Freecam.MC.options.rightKey.isPressed()) yaw = config.controls.keyboard.rightKeyYaw;
+        else if(Freecam.MC.options.leftKey.isPressed()) yaw = config.controls.keyboard.leftKeyYaw;
         else yaw = 0;
 
         if(Freecam.MC.currentScreen == null) {
@@ -80,7 +80,7 @@ public class ControllerManager {
             float sensitivity = Freecam.MC.options.getMouseSensitivity().getValue().floatValue();
 
             roll =  (mouseX - lastMouseX) * sensitivity * 0.01f;
-            pitch = (mouseY - lastMouseY) * sensitivity * 0.01f * (config.droneConfig.invertMousePitchWhileFlying ? -1 : 1);
+            pitch = (mouseY - lastMouseY) * sensitivity * 0.01f * (config.controls.invertMousePitchWhileFlying ? -1 : 1);
             lastMouseX = mouseX;
             lastMouseY = mouseY;
         }
