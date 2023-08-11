@@ -48,15 +48,10 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         public void sendPacket(Packet<?> packet) {
         }
     };
-
-    public FreeCamera(int id) {
-        this(id, FreecamPosition.getSwimmingPosition(MC.player));
-    }
-
-    public FreeCamera(int id, FreecamPosition position) {
+    public FreeCamera() {
         super(MC, MC.world, NETWORK_HANDLER, MC.player.getStatHandler(), MC.player.getRecipeBook(), false, false);
-
-        setId(id);
+        var position = MC.player.getPos();
+        setId(-480);
         this.setPosition(position.x, position.y, position.z);
         this.setRotation(0, 0);
         getAbilities().flying = true;
