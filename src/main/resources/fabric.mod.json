@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "freecam",
+  "id": "fpv-drone",
   "version": "${version}",
-  "name": "Freecam",
+  "name": "fpv drone mod",
   "description": "A highly customizable freecam mod.",
-  "authors": ["hashalite"],
+  "authors": ["AndreyBali"],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/free-cam",
     "sources": "https://github.com/hashalite/Freecam",
@@ -14,15 +14,18 @@
   "icon": "assets/freecam/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["net.xolt.freecam.Freecam"],
+    "client": [
+      "net.andreyabli.fpvdrone.Freecam"
+    ],
     "modmenu": [
-      "net.xolt.freecam.config.ModMenuIntegration"
+      "net.andreyabli.fpvdrone.config.ModMenuIntegration"
     ]
   },
   "mixins": [
     "freecam.mixins.json"
   ],
   "depends": {
+    "rayon": ">=1.7.2",
     "fabricloader": ">=0.12.11",
     "fabric": "*",
     "minecraft": "~1.20"
