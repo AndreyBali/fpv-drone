@@ -3,12 +3,12 @@
   "id": "fpv-drone",
   "version": "${version}",
   "name": "fpv drone mod",
-  "description": "A highly customizable freecam mod.",
+  "description": "Client side mod for flying a fpv drone",
   "authors": ["AndreyBali"],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/free-cam",
-    "sources": "https://github.com/hashalite/Freecam",
-    "issues": "https://github.com/hashalite/Freecam/issues"
+    "homepage": "https://github.com/AndreyBali/fpv-drone",
+    "sources": "https://github.com/AndreyBali/fpv-drone",
+    "issues": "https://github.com/AndreyBali/fpv-drone/issues"
   },
   "license": "MIT",
   "icon": "assets/fpvdrone/icon.png",
