@@ -37,9 +37,9 @@ public class Freecam implements ClientModInitializer {
         ModConfig.init();
         ControllerManager.init(ModConfig.INSTANCE);
         freecamBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.freecam.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F4, "category.freecam.freecam"));
+                "key.fpvdrone.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, "category.fpvdrone.freecam"));
         configGuiBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.freecam.configGui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.freecam.freecam"));
+                "key.fpvdrone.configGui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.fpvdrone.freecam"));
 //        ClientPlayConnectionEvents.INIT.register((handler, client) -> joinTime = System.currentTimeMillis());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (freecamBind.wasPressed()) {

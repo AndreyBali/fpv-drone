@@ -22,7 +22,7 @@
     ]
   },
   "mixins": [
-    "freecam.mixins.json"
+    "fpvdrone.mixins.json"
   ],
   "depends": {
     "rayon": ">=1.7.2",
