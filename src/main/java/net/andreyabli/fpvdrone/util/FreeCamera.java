@@ -85,7 +85,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
             return;
         }
         rigidBody.setMass(getMass());
-        if(MinecraftClient.getInstance().player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
+        if(MC.player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
             MC.player.copyPositionAndRotation(this);
         }
 
