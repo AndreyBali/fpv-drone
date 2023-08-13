@@ -48,12 +48,16 @@ public class ControllerManager {
             updateControllers();
             nextControllerCheck = System.currentTimeMillis() + 500;
         }
-        if (config.controls.device.getSelectedString().equals("keyboard")) {
+        if (config.controls.device.equals("keyboard")) {
             handleKeyboardInput();
             return;
         }
 
-        int jId = controllerIds.get(config.controls.device.getSelectedString());
+        int jId = controllerIds.get(config.controls.device);
+        if(!GLFW.glfwJoystickPresent(jId)){
+            updateControllers();
+            jId = controllerIds.get(config.controls.device);
+        }
         throttle = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.throttleChannel) * (config.controls.controller.invertThrottle ? -1 : 1);
         roll = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.rollChannel) * (config.controls.controller.invertRoll ? -1 : 1);
         pitch = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.pitchChannel) * (config.controls.controller.invertPitch ? -1 : 1);
@@ -84,5 +88,13 @@ public class ControllerManager {
             lastMouseX = mouseX;
             lastMouseY = mouseY;
         }
+    }
+
+    public static String thisOrDefault(String controllerName) {
+        updateControllers();
+        if(controllers.contains(controllerName)){
+            return controllerName;
+        }
+        return controllers.get(0);
     }
 }

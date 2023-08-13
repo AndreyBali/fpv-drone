@@ -33,9 +33,9 @@ import static net.andreyabli.fpvdrone.Freecam.MC;
 
 public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsElement {
 
-    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().cameraAngle;
-    private final double width = ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().width;
-    private final double height = ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().height;
+    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.getCurrentDrone().cameraAngle;
+    private final double width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
+    private final double height = ModConfig.INSTANCE.droneConfig.getCurrentDrone().height;
     private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
 
 //    private int tickCounter = 0;
@@ -142,19 +142,19 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     }
 
     private float getThrust() {
-        return ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().thrust;
+        return ModConfig.INSTANCE.droneConfig.getCurrentDrone().thrust;
     }
 
     private float getThrustCurve() {
-        return ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().thrustCurve;
+        return ModConfig.INSTANCE.droneConfig.getCurrentDrone().thrustCurve;
     }
 
     private float getMass() {
-        return ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().mass;
+        return ModConfig.INSTANCE.droneConfig.getCurrentDrone().mass;
     }
 
     private float getDragCoefficient() {
-        return ModConfig.INSTANCE.droneConfig.drone.getSelectedDrone().dragCoefficient;
+        return ModConfig.INSTANCE.droneConfig.getCurrentDrone().dragCoefficient;
     }
     private MinecraftShape getShape() {
         return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));

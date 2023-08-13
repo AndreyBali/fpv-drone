@@ -5,14 +5,16 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
-import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.util.Utils;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.andreyabli.fpvdrone.util.ControllerManager;
 import net.minecraft.text.Text;
 
-import java.lang.reflect.Field;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.*;
 
 @Config(name = "fpvdrone")
@@ -26,30 +28,44 @@ public class ModConfig implements ConfigData {
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
         GuiRegistry registry = AutoConfig.getGuiRegistry(ModConfig.class);
 
-        registry.registerTypeProvider((String i13n, Field field, Object config, Object defaults, GuiRegistryAccess guiRegistry) -> {
-            return Collections.singletonList(
-                    ConfigEntryBuilder.create().startSelector(
-                            Text.translatable(i13n),
-                            Utils.<SelectableDevice>getUnsafely(field, config).getArray(),
-                            Utils.<SelectableDevice>getUnsafely(field, config).getSelectedString()
-                    ).setSaveConsumer((newValue) -> Utils.<SelectableDevice>getUnsafely(field, config).select(newValue.toString()))
-                    .build()
-            );
-        }, SelectableDevice.class);
-
-        registry.registerTypeProvider((String i13n, Field field, Object config, Object defaults, GuiRegistryAccess guiRegistry) -> {
+        registry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             return Collections.singletonList(
                     ConfigEntryBuilder.create().startSelector(
                                     Text.translatable(i13n),
-                                    Utils.<SelectableDrone>getUnsafely(field, config).getArray(),
-                                    Utils.<SelectableDrone>getUnsafely(field, config).getSelectedDrone()
-                            ).setSaveConsumer(newValue -> Utils.<SelectableDrone>getUnsafely(field, config).select((DroneConfig.Drone) newValue))
+                                    ControllerManager.getControllers().toArray(),
+                                    ControllerManager.thisOrDefault(Utils.getUnsafely(field, config).toString())
+                            ).setSaveConsumer((newValue) -> Utils.setUnsafely(field, config, newValue))
+                            .build()
+            );
+        }, SelectableDevice.class);
+
+        registry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+            return Collections.singletonList(
+                    ConfigEntryBuilder.create().startSelector(
+                                    Text.translatable(i13n),
+                                    INSTANCE.droneConfig.getDronesNames(),
+                                    thisDroneByNameOrDefault(Utils.getUnsafely(field, config)).name
+                            ).setSaveConsumer((newValue) -> Utils.setUnsafely(field, config, newValue))
                             .build()
             );
         }, SelectableDrone.class);
 
 
         INSTANCE = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+    }
+
+    private static DroneConfig.Drone thisDroneByNameOrDefault(String droneName) {
+        for(DroneConfig.Drone drone : INSTANCE.droneConfig.drones) {
+            if(Objects.equals(drone.name, droneName)) return drone;
+        }
+        if(INSTANCE.droneConfig.drones.isEmpty()) {
+            INSTANCE.droneConfig.drones = new ArrayList<>(Arrays.asList(
+                    new DroneConfig.Drone("Pixel", 0.225, 0.125, 0.01, 0.05, 0.4, 1, 5),
+                    new DroneConfig.Drone("Voyager", 0.9, 0.2, 1.2, 0.2, 55, 0.8, 20),
+                    new DroneConfig.Drone("Voxel racer one", 0.55, 0.3, 0.5, 0.135, 65, 1, 45)
+            ));
+        }
+        return INSTANCE.droneConfig.drones.get(0);
     }
 
     @ConfigEntry.Gui.Tooltip
@@ -94,8 +110,8 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.CollapsibleObject
     public Controls controls = new Controls();
     public static class Controls {
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        public SelectableDevice device = new SelectableDevice();
+        @SelectableDevice
+        public String device = "keyboard";
         @ConfigEntry.BoundedDiscrete(min = -1, max = 2) public float rate = 0.7f;
         @ConfigEntry.BoundedDiscrete(min = -1, max = 2) public float superRate = 0.9f;
         @ConfigEntry.BoundedDiscrete(min = -1, max = 2)  public float expo = 0.1f;
@@ -139,15 +155,31 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.CollapsibleObject
     public DroneConfig droneConfig = new DroneConfig();
     public static class DroneConfig {
-
+        public Drone getCurrentDrone(){
+            return ModConfig.thisDroneByNameOrDefault(drone);
+        }
+        public Object[] getDronesNames(){
+            if(drones.isEmpty()) {
+                drones = new ArrayList<>(Arrays.asList(
+                        new DroneConfig.Drone("Pixel", 0.225, 0.125, 0.01, 0.05, 0.4, 1, 5),
+                        new DroneConfig.Drone("Voyager", 0.9, 0.2, 1.2, 0.2, 55, 0.8, 20),
+                        new DroneConfig.Drone("Voxel racer one", 0.55, 0.3, 0.5, 0.135, 65, 1, 45)
+                ));
+            }
+            List<String> str = new ArrayList<>();
+            for(DroneConfig.Drone drone : INSTANCE.droneConfig.drones) {
+                str.add(drone.name);
+            }
+            return str.toArray();
+        }
 
         public List<Drone> drones = new ArrayList<>(Arrays.asList(
                 new Drone("Pixel", 0.225, 0.125, 0.01, 0.05, 0.4, 1, 5),
                 new Drone("Voyager", 0.9, 0.2, 1.2, 0.2, 55, 0.8, 20),
                 new Drone("Voxel racer one", 0.55, 0.3, 0.5, 0.135, 65, 1, 45)
         ));
-
-        public SelectableDrone drone = new SelectableDrone(drones);
+        @SelectableDrone
+        public String drone = "Voyager";
 
         public static class Drone {
             public Drone(String name, double width, double height, double mass, double dragCoefficient, double thrust, double thrustCurve, int cameraAngle){
@@ -162,22 +194,31 @@ public class ModConfig implements ConfigData {
             }
             public Drone(){}
             public String name = "New drone";
-            public float width = 0.55f;
-            public float height = 0.3f;
-            public float mass = 0.5f;
-            public float dragCoefficient = 0.135f;
-            public float thrust = 65;
-            public float thrustCurve = 1;
-            public int cameraAngle = 45;
+            public float width = 0.9f;
+            public float height = 0.2f;
+            public float mass = 1.2f;
+            public float dragCoefficient = 0.2f;
+            public float thrust = 55;
+            public float thrustCurve = 0.8f;
+            public int cameraAngle = 20;
 
             @Override
             public String toString() {
                 return name;
             }
         }
-
-
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface SelectableDrone {}
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface SelectableDevice {}
+
+
+
 //        @ConfigEntry.Gui.CollapsibleObject
 //        public ReplayMod replayMod = new ReplayMod();
 //
