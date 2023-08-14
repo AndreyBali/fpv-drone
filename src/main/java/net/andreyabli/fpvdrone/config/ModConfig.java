@@ -135,16 +135,16 @@ public class ModConfig implements ConfigData {
         public Controller controller = new Controller();
         public static class Controller {
             @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
-            public int throttleChannel = 0;
+            public int throttle = 0;
             public boolean invertThrottle = false;
             @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
-            public int rollChannel = 1;
+            public int roll = 1;
             public boolean invertRoll = false;
             @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
-            public int pitchChannel = 2;
+            public int pitch = 2;
             public boolean invertPitch = false;
             @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
-            public int yawChannel = 3;
+            public int yaw = 3;
             public boolean invertYaw = true;
         }
     }

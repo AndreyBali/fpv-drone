@@ -23,7 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.andreyabli.fpvdrone.config.ModConfig;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -37,6 +37,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     private final double width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
     private final double height = ModConfig.INSTANCE.droneConfig.getCurrentDrone().height;
     private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
+    private boolean ignoreNextInput = false;
 
 //    private int tickCounter = 0;
 //    private long createdAt = 0;
@@ -48,6 +49,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         public void sendPacket(Packet<?> packet) {
         }
     };
+
     public FreeCamera() {
         super(MC, MC.world, NETWORK_HANDLER, MC.player.getStatHandler(), MC.player.getRecipeBook(), false, false);
         var position = MC.player.getPos();
@@ -66,7 +68,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     public void spawn() {
         if (clientWorld != null) {
             clientWorld.addEntity(getId(), this);
-            ControllerManager.updateControllerAxis();
+            ignoreNextInput = true;
         }
     }
 
@@ -82,11 +84,16 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         super.tick();
         if (ModConfig.INSTANCE.utility.pauseOnMenu && MinecraftClient.getInstance().currentScreen != null) {
             rigidBody.setMass(0);
+            ignoreNextInput = true;
             return;
         }
         rigidBody.setMass(getMass());
         if(MC.player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
             MC.player.copyPositionAndRotation(this);
+        }
+        if(ignoreNextInput) {
+            ControllerManager.updateControllerAxis();
+            ignoreNextInput = false;
         }
 
         ControllerManager.updateControllerAxis();
@@ -182,7 +189,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     @Override
     public void updateVelocity(float speed, Vec3d movementInput) {}
     @Override
-    public @Nullable EntityRigidBody getRigidBody() {
+    public @NotNull EntityRigidBody getRigidBody() {
         return this.rigidBody;
     }
 

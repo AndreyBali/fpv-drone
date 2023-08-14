@@ -5,9 +5,13 @@ import net.minecraft.client.Mouse;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static org.lwjgl.glfw.GLFW.glfwGetJoystickAxes;
+import static org.lwjgl.glfw.GLFW.glfwJoystickPresent;
 
 public class ControllerManager {
 
@@ -58,10 +62,10 @@ public class ControllerManager {
             updateControllers();
             jId = controllerIds.get(config.controls.device);
         }
-        throttle = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.throttleChannel) * (config.controls.controller.invertThrottle ? -1 : 1);
-        roll = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.rollChannel) * (config.controls.controller.invertRoll ? -1 : 1);
-        pitch = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.pitchChannel) * (config.controls.controller.invertPitch ? -1 : 1);
-        yaw = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.yawChannel) * (config.controls.controller.invertYaw ? -1 : 1);
+        throttle = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.throttle) * (config.controls.controller.invertThrottle ? -1 : 1);
+        roll = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.roll) * (config.controls.controller.invertRoll ? -1 : 1);
+        pitch = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.pitch) * (config.controls.controller.invertPitch ? -1 : 1);
+        yaw = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.yaw) * (config.controls.controller.invertYaw ? -1 : 1);
     }
 
 
@@ -88,6 +92,14 @@ public class ControllerManager {
             lastMouseX = mouseX;
             lastMouseY = mouseY;
         }
+    }
+
+    public static FloatBuffer getAllAxisValues() {
+        updateControllers();
+        if (config.controls.device.equals("keyboard")) return null;
+        int jId = controllerIds.get(config.controls.device);
+        if(!GLFW.glfwJoystickPresent(jId)) return null;
+        return glfwGetJoystickAxes(jId).duplicate();
     }
 
     public static String thisOrDefault(String controllerName) {
