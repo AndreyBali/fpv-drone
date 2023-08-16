@@ -13,32 +13,25 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ControllerSetupScreen extends Screen {
+    private enum Stage {
+        BEGIN, THROTTLE, YAW, PITCH, ROLL, TEST
+    }
     private final Screen parent;
     private ButtonWidget saveButton;
-    private ButtonWidget cancelButton;
     private ButtonWidget configButton;
-    private ButtonWidget pitchButton;
-    private ButtonWidget yawButton;
-    private ButtonWidget rollButton;
-    private ButtonWidget throttleButton;
-    private ButtonWidget invertPitchButton;
-    private ButtonWidget invertYawButton;
-    private ButtonWidget invertRollButton;
-    private ButtonWidget invertThrottleButton;
+    private ButtonWidget nextButton;
     private Consumer<Integer> axisConsumer;
 
     private FloatBuffer axes;
     private List<Float> previousAxes;
+    private Stage stage = Stage.BEGIN;
 
     public ControllerSetupScreen(Screen parent) {
         super(Text.translatable("quadz.config.controller_setup.title"));
         this.parent = parent;
     }
-
     @Override
     public void init() {
-        var controllerConfig = ModConfig.INSTANCE.controls.controller; 
-        
         var spacing = 10;
         var bWidth = 60;
         var bHeight = 20;
@@ -48,67 +41,47 @@ public class ControllerSetupScreen extends Screen {
             .size(bWidth, bHeight)
             .build();
 
-        this.cancelButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.cancel"), this::onCancelButton)
+        this.configButton = ButtonWidget.builder(Text.translatable("config"), this::onConfigButton)
                 .position(spacing + bWidth + spacing / 2, height - bHeight - spacing)
                 .size(bWidth, bHeight)
                 .build();
 
-        this.configButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.config"), this::onConfigButton)
+        this.nextButton = ButtonWidget.builder(Text.translatable("next"), button -> onAxisButton(this::onNextButton))
                 .position(width - spacing - bWidth, height - bHeight - spacing)
                 .size(bWidth, bHeight)
                 .build();
 
-        this.pitchButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.pitch"), button -> onAxisButton(axis -> controllerConfig.pitch = axis))
-            .position(width / 2 + bWidth + spacing, bHeight + spacing)
-            .size(bWidth, bHeight)
-            .build();
-
-        this.yawButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.yaw"), button -> onAxisButton(axis -> controllerConfig.yaw = axis))
-            .position(width / 2 - bWidth - spacing / 3, bHeight + spacing)
-            .size(bWidth, bHeight)
-            .build();
-
-        this.rollButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.roll"), button -> onAxisButton(axis -> controllerConfig.roll = axis))
-            .position(width / 2 + spacing / 3, bHeight + spacing)
-            .size(bWidth, bHeight)
-            .build();
-
-        this.throttleButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.throttle"), button -> onAxisButton(axis -> controllerConfig.throttle = axis))
-            .position(width / 2 - bWidth * 2 - spacing, bHeight + spacing)
-            .size(bWidth, bHeight)
-            .build();
-
-        this.invertPitchButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.invert"), button -> controllerConfig.invertPitch = !controllerConfig.invertPitch)
-                .position(width / 2 + bWidth + spacing, bHeight * 2 + spacing)
-                .size(bWidth, bHeight)
-                .build();
-
-        this.invertYawButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.invert"), button -> controllerConfig.invertYaw = !controllerConfig.invertYaw)
-                .position(width / 2 - bWidth - spacing / 3, bHeight * 2 + spacing)
-                .size(bWidth, bHeight)
-                .build();
-
-        this.invertRollButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.invert"), button -> controllerConfig.invertRoll = !controllerConfig.invertRoll)
-                .position(width / 2 + spacing / 3, bHeight * 2 + spacing)
-                .size(bWidth, bHeight)
-                .build();
-
-        this.invertThrottleButton = ButtonWidget.builder(Text.translatable("quadz.config.controller_setup.invert"), button -> controllerConfig.invertThrottle = !controllerConfig.invertThrottle)
-                .position(width / 2 - bWidth * 2 - spacing, bHeight * 2 + spacing)
-                .size(bWidth, bHeight)
-                .build();
-
         this.addDrawableChild(this.saveButton);
-        this.addDrawableChild(this.cancelButton);
         this.addDrawableChild(this.configButton);
-        this.addDrawableChild(this.pitchButton);
-        this.addDrawableChild(this.yawButton);
-        this.addDrawableChild(this.rollButton);
-        this.addDrawableChild(this.throttleButton);
-        this.addDrawableChild(this.invertPitchButton);
-        this.addDrawableChild(this.invertYawButton);
-        this.addDrawableChild(this.invertRollButton);
-        this.addDrawableChild(this.invertThrottleButton);
+        this.addDrawableChild(this.nextButton);
+    }
+    private void onNextButton(int axis) {
+        var controllerConfig = ModConfig.INSTANCE.controls.controller;
+        boolean invertAxis = false;
+        if(axis < 0) {
+            invertAxis = true;
+            axis *= -1;
+        }
+        axis -=1;
+
+        switch (stage) {
+            case THROTTLE -> {
+                controllerConfig.throttle = axis;
+                controllerConfig.invertThrottle = invertAxis;
+            }
+            case YAW -> {
+                controllerConfig.yaw = axis;
+                controllerConfig.invertYaw = invertAxis;
+            }
+            case PITCH -> {
+                controllerConfig.pitch = axis;
+                controllerConfig.invertPitch = invertAxis;
+            }
+            case ROLL -> {
+                controllerConfig.roll = axis;
+                controllerConfig.invertRoll = invertAxis;
+            }
+        }
     }
 
     private void onSaveButton(ButtonWidget button) {
@@ -125,16 +98,17 @@ public class ControllerSetupScreen extends Screen {
     }
 
     private void onAxisButton(Consumer<Integer> axisConsumer) {
+        switch (stage) {
+            case BEGIN -> stage = Stage.THROTTLE;
+            case THROTTLE -> stage = Stage.YAW;
+            case YAW -> stage = Stage.PITCH;
+            case PITCH -> stage = Stage.ROLL;
+            case ROLL -> stage = Stage.TEST;
+        }
+        startAnimationTime = System.currentTimeMillis();
         this.axisConsumer = axisConsumer;
-        this.pitchButton.active = false;
-        this.yawButton.active = false;
-        this.rollButton.active = false;
-        this.throttleButton.active = false;
         this.saveButton.active = false;
-        this.invertPitchButton.active = false;
-        this.invertYawButton.active = false;
-        this.invertRollButton.active = false;
-        this.invertThrottleButton.active = false;
+        this.configButton.active = false;
     }
 
     @Override
@@ -144,23 +118,15 @@ public class ControllerSetupScreen extends Screen {
             var previousAxis = Math.round(this.previousAxes.get(this.axes.position() - 1) * 10f) / 10f;
 
             if (currentAxis != previousAxis) {
-                this.axisConsumer.accept(this.axes.position() - 1);
+                this.axisConsumer.accept(this.axes.position() * (currentAxis > 0 ? 1 : -1));
                 this.axisConsumer = null;
-                this.pitchButton.active = true;
-                this.yawButton.active = true;
-                this.rollButton.active = true;
-                this.throttleButton.active = true;
                 this.saveButton.active = true;
-                this.invertPitchButton.active = true;
-                this.invertYawButton.active = true;
-                this.invertRollButton.active = true;
-                this.invertThrottleButton.active = true;
+                this.configButton.active = true;
                 break;
             }
         }
 
-        if (this.axes != null && this.axes.remaining() > 0)
-            this.previousAxes = toArray(this.axes);
+        if (this.axes != null && this.axes.remaining() > 0) this.previousAxes = toArray(this.axes);
         this.axes = ControllerManager.getAllAxisValues();
     }
     static List<Float> toArray(FloatBuffer floatBuffer) {
@@ -173,15 +139,38 @@ public class ControllerSetupScreen extends Screen {
 
         return out;
     }
+    private long startAnimationTime = System.currentTimeMillis();
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context);
-        ControllerManager.updateControllerAxis();
-        var pitch = ControllerManager.pitch;
-        var yaw = ControllerManager.yaw;
-        var roll = ControllerManager.roll;
-        var throttle = ControllerManager.throttle;
+        float pitch = 0;
+        float yaw = 0;
+        float roll = 0;
+        float throttle = 0;
+        if(stage == Stage.BEGIN || stage == Stage.TEST) {
+            ControllerManager.updateControllerAxis();
+            pitch = ControllerManager.pitch;
+            yaw = ControllerManager.yaw;
+            roll = ControllerManager.roll;
+            throttle = ControllerManager.throttle;
+        } else {
+            long currentTime = System.currentTimeMillis();
+            long elapsedTime = currentTime - startAnimationTime;
+            float progress = 0;
+            if (elapsedTime < 700) {
+                progress = (float) elapsedTime / 700;
+            } else {
+                startAnimationTime = currentTime;
+            }
+            switch (stage) {
+                case THROTTLE -> throttle = progress;
+                case YAW -> yaw = progress;
+                case PITCH -> pitch = progress;
+                case ROLL -> roll = progress;
+            }
+        }
+
         renderSticks(context, delta, width / 2, height / 2 + 20, 40, 10, pitch, yaw, roll, throttle);
 
         // An axis has been selected. Time to listen...
@@ -197,7 +186,7 @@ public class ControllerSetupScreen extends Screen {
         var topY = y + scale;
         var bottomY = y - scale;
 
-        // Draw crosses1
+        // Draw crosses
 
         context.fill(leftX, bottomY + 1, leftX + 1, topY, 0xFFFFFFFF);
         context.fill(rightX, bottomY + 1, rightX + 1, topY, 0xFFFFFFFF);
@@ -205,7 +194,7 @@ public class ControllerSetupScreen extends Screen {
         context.fill(rightX - scale, y, rightX + scale + 1, y + 1, 0xFFFFFFFF);
 
         // Draw stick positions
-        int dotSize = 2;
+        int dotSize = 3;
         int yawAdjusted = (int) (yaw * scale);
         int throttleAdjusted = (int) (throttle * scale);
         int rollAdjusted = (int) (roll * scale);

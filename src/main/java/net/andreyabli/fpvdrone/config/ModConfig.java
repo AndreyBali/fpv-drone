@@ -134,16 +134,16 @@ public class ModConfig implements ConfigData {
         @ConfigEntry.Gui.CollapsibleObject
         public Controller controller = new Controller();
         public static class Controller {
-            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 5)
             public int throttle = 0;
             public boolean invertThrottle = false;
-            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 5)
             public int roll = 1;
             public boolean invertRoll = false;
-            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 5)
             public int pitch = 2;
             public boolean invertPitch = false;
-            @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+            @ConfigEntry.BoundedDiscrete(min = 0, max = 5)
             public int yaw = 3;
             public boolean invertYaw = true;
         }

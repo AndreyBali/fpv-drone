@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "fpv-drone",
+  "id": "fpvdrone",
   "version": "${version}",
   "name": "fpv drone mod",
   "description": "Client side mod for flying a fpv drone",

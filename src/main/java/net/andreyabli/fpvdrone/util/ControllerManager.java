@@ -45,6 +45,7 @@ public class ControllerManager {
                 controllers.add(jName);
             }
         }
+        if(!controllers.contains(config.controls.device)) config.controls.device = controllers.get(0);
     }
 
     public static void updateControllerAxis() {
@@ -56,9 +57,9 @@ public class ControllerManager {
             handleKeyboardInput();
             return;
         }
-
+        if(controllerIds.get(config.controls.device) == null) updateControllers();
         int jId = controllerIds.get(config.controls.device);
-        if(!GLFW.glfwJoystickPresent(jId)){
+        if(!GLFW.glfwJoystickPresent(jId)) {
             updateControllers();
             jId = controllerIds.get(config.controls.device);
         }
