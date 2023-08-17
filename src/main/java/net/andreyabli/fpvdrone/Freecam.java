@@ -22,7 +22,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL;
 public class Freecam implements ClientModInitializer {
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
-
+    public static final String MOD_ID = "fpvdrone";
     private static KeyBinding freecamBind;
     private static KeyBinding configGuiBind;
     private static boolean freecamEnabled = false;
