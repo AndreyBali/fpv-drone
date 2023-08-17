@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.entity.FreeCamera;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.entity.Entity;

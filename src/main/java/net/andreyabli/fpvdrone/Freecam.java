@@ -1,20 +1,29 @@
 package net.andreyabli.fpvdrone;
 
+import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
+import dev.lazurite.rayon.impl.bullet.collision.space.generator.EntityCollisionGenerator;
 import me.shedaniel.autoconfig.AutoConfig;
+import net.andreyabli.fpvdrone.entity.DroneRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.input.Input;
 import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.*;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import net.andreyabli.fpvdrone.util.ControllerManager;
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.entity.FreeCamera;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
+import software.bernie.geckolib.GeckoLib;
 
 import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL;
@@ -49,7 +58,29 @@ public class Freecam implements ClientModInitializer {
                 MC.setScreen(AutoConfig.getConfigScreen(ModConfig.class, MC.currentScreen).get());
             }
         });
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if(client.world == null) {
+                System.out.println("world is null!");
+                return;
+            }
+            EntityCollisionGenerator.step(MinecraftSpace.get(client.world));
+            if(freeCamera != null){
+                freeCamera.tick();
+            }
+        });
+        GeckoLib.initialize();
+        EntityRendererRegistry.register(DRONE, DroneRenderer::new);
     }
+
+    public static final EntityType<FreeCamera> DRONE = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier(MOD_ID, "quadcopter"),
+            FabricEntityTypeBuilder.createLiving()
+                    .entityFactory(FreeCamera::new)
+                    .spawnGroup(SpawnGroup.MISC)
+//                    .dimensions(EntityDimensions.scalable(0.5f, 0.2f))
+                    .defaultAttributes(LivingEntity::createLivingAttributes)
+                    .build());
 
     public static void toggle() {
         if (freecamEnabled) {
@@ -65,8 +96,9 @@ public class Freecam implements ClientModInitializer {
 
     private static void onEnableFreecam() {
         onEnable();
-        freeCamera = new FreeCamera();
-        freeCamera.spawn();
+        freeCamera = DRONE.create(MC.world);
+        System.out.println("freeCamera = " + freeCamera);
+        freeCamera.setPosition(MC.player.getPos());
         MC.setCameraEntity(freeCamera);
 
         if (ModConfig.INSTANCE.notification.notifyFreecam) {
@@ -104,8 +136,7 @@ public class Freecam implements ClientModInitializer {
         MC.gameRenderer.setRenderHand(true);
         MC.setCameraEntity(MC.player);
         playerControlEnabled = false;
-        freeCamera.despawn();
-        freeCamera.input = new Input();
+        freeCamera.remove(Entity.RemovalReason.DISCARDED);
         freeCamera = null;
 
         if (MC.player != null) {

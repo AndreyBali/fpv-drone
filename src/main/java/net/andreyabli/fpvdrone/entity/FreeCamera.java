@@ -1,4 +1,4 @@
-package net.andreyabli.fpvdrone.util;
+package net.andreyabli.fpvdrone.entity;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -11,27 +11,45 @@ import dev.lazurite.rayon.impl.bullet.collision.body.shape.MinecraftShape;
 import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.toolbox.api.math.QuaternionHelper;
-import dev.lazurite.toolbox.api.math.VectorHelper;
+import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.util.BetaflightHelper;
+import net.andreyabli.fpvdrone.util.ControllerManager;
+import net.andreyabli.fpvdrone.util.Matrix4fHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.util.Arm;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.andreyabli.fpvdrone.config.ModConfig;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.model.GeoModel;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static net.andreyabli.fpvdrone.Freecam.MC;
+import static net.andreyabli.fpvdrone.Freecam.debuggerReleaseControl;
 
-public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsElement {
+public class FreeCamera extends LivingEntity implements EntityPhysicsElement, GeoEntity {
 
     public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.getCurrentDrone().cameraAngle;
     private final double width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
@@ -50,14 +68,14 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         }
     };
 
-    public FreeCamera() {
-        super(MC, MC.world, NETWORK_HANDLER, MC.player.getStatHandler(), MC.player.getRecipeBook(), false, false);
+    public FreeCamera(EntityType<FreeCamera> entityType, World world) {
+        super(entityType, world);
         var position = MC.player.getPos();
         setId(-480);
         this.setPosition(position.x, position.y, position.z);
         this.setRotation(0, 0);
-        getAbilities().flying = true;
-        input = new KeyboardInput(MC.options);
+//        getAbilities().flying = true;
+//        input = new KeyboardInput(MC.options);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
         this.rigidBody.setMass(getMass());
@@ -65,19 +83,19 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //        createdAt = System.currentTimeMillis();
     }
 
-    public void spawn() {
-        if (clientWorld != null) {
-            clientWorld.addEntity(getId(), this);
-            ignoreNextInput = true;
-        }
-    }
-
-    public void despawn() {
-        if (clientWorld != null && clientWorld.getEntityById(getId()) != null) {
-            clientWorld.removeEntity(getId(), RemovalReason.DISCARDED);
-        }
-//        System.out.println(replayModHelper.getJson());
-    }
+//    public void spawn() {
+//        if (clientWorld != null) {
+//            clientWorld.addEntity(getId(), this);
+//            ignoreNextInput = true;
+//        }
+//    }
+//
+//    public void despawn() {
+//        if (clientWorld != null && clientWorld.getEntityById(getId()) != null) {
+//            clientWorld.removeEntity(getId(), RemovalReason.DISCARDED);
+//        }
+////        System.out.println(replayModHelper.getJson());
+//    }
 
     @Override
     public void tick() {
@@ -137,7 +155,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         if (Float.isFinite(thrust.length())) {
             getRigidBody().applyCentralForce(thrust.add(yawThrust).multLocal(-1));
         } else {
-            FreeCamera.LOGGER.warn("Infinite thrust force!");
+            System.out.println("Infinite thrust force!");
         }
 
 //        if (ModConfig.INSTANCE.droneConfig.replayMod.record) {
@@ -146,6 +164,11 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //                replayModHelper.add(createdAt, CAMERA_ANGLE, getRotation(0), getPosition(0));
 //            }
 //        }
+    }
+
+    @Override
+    public Arm getMainArm() {
+        return null;
     }
 
     private float getThrust() {
@@ -197,10 +220,43 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
     }
+
+    @Override
+    public Iterable<ItemStack> getArmorItems() {
+        return Collections.singleton(ItemStack.EMPTY);
+    }
+
+    @Override
+    public ItemStack getEquippedStack(EquipmentSlot slot) {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void equipStack(EquipmentSlot slot, ItemStack stack) {
+
+    }
+
     // Ensures that the FreeCamera is always in the swimming pose.
     @Override
     public void setPose(EntityPose pose) {
         super.setPose(EntityPose.SWIMMING);
     }
 
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "Flying", 5, this::flyAnimController));
+    }
+
+    private <T extends GeoAnimatable> PlayState flyAnimController(AnimationState<T> tAnimationState) {
+        return PlayState.STOP;
+//        if(ControllerManager.throttle > -0.7f) {
+//            tAnimationState.getController().setAnimation(RawAnimation.begin().then("animation.fpvdrone.fly", Animation.LoopType.LOOP));
+//        }
+//        return PlayState.STOP;
+    }
+    private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
 }

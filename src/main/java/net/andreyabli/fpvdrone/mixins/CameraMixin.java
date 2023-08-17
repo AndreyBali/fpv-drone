@@ -4,7 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import net.andreyabli.fpvdrone.Freecam;
 import net.andreyabli.fpvdrone.config.ModConfig;
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.entity.FreeCamera;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
