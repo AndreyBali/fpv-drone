@@ -182,8 +182,8 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         return getPhysicsRotation(new Quaternion(), tickDelta);
     }
 
-    public Vec3d getPosition(float tickDelta) {
-        return VectorHelper.toVec3(Convert.toMinecraft(getPhysicsLocation(new Vector3f(), tickDelta)));
+    public Vector3f getPosition(float tickDelta) {
+        return getPhysicsLocation(new Vector3f(), tickDelta);
     }
 
     @Override

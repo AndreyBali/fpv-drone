@@ -1,8 +1,12 @@
 package net.andreyabli.fpvdrone.mixins;
 
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import net.andreyabli.fpvdrone.Freecam;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.CameraSubmersionType;
 import net.minecraft.entity.Entity;
@@ -24,7 +28,22 @@ public abstract class CameraMixin {
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdate(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
         if (focusedEntity instanceof FreeCamera freeCamera) {
-            var pos = freeCamera.getPosition(tickDelta);
+            Vector3f pos = freeCamera.getPosition(tickDelta);
+            Quaternion rot = freeCamera.getRotation(tickDelta);
+
+            MinecraftClient client = MinecraftClient.getInstance();
+            if(inverseView) client.options.setPerspective(Perspective.FIRST_PERSON);
+            if(thirdPerson){
+                thirdPerson = false;
+                inverseView = false;
+                Vector3f localOffset = new Vector3f(0, 2, -5);
+
+                Vector3f worldOffset = rot.mult(localOffset, new Vector3f());
+                pos = pos.add(worldOffset);
+
+                // Calculate rotation that looks at the player
+//                pos = pos.subtract(cameraPosition).normalize();
+            }
             this.setPos(pos.x, pos.y, pos.z);
             this.setRotation(0,0);
         }
