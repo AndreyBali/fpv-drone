@@ -1,5 +1,6 @@
 package net.andreyabli.fpvdrone.util;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -11,7 +12,6 @@ import dev.lazurite.rayon.impl.bullet.collision.body.shape.MinecraftShape;
 import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.toolbox.api.math.QuaternionHelper;
-import dev.lazurite.toolbox.api.math.VectorHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
@@ -32,12 +32,9 @@ import java.util.UUID;
 import static net.andreyabli.fpvdrone.Freecam.MC;
 
 public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsElement {
-
-    public int CAMERA_ANGLE = ModConfig.INSTANCE.droneConfig.getCurrentDrone().cameraAngle;
-    private final double width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
-    private final double height = ModConfig.INSTANCE.droneConfig.getCurrentDrone().height;
-    private final EntityRigidBody rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), getShape());
+    private final EntityRigidBody rigidBody;
     private boolean ignoreNextInput = false;
+    private MinecraftShape previousShape;
 
 //    private int tickCounter = 0;
 //    private long createdAt = 0;
@@ -58,6 +55,8 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         this.setRotation(0, 0);
         getAbilities().flying = true;
         input = new KeyboardInput(MC.options);
+        previousShape = getShape();
+        rigidBody = new EntityRigidBody(this, MinecraftSpace.get(this.cast().getWorld()), previousShape);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
         this.rigidBody.setDragType(ElementRigidBody.DragType.SIMPLE);
         this.rigidBody.setMass(getMass());
@@ -88,12 +87,19 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
             return;
         }
         rigidBody.setMass(getMass());
+
         if(MC.player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
             MC.player.copyPositionAndRotation(this);
         }
+
         if(ignoreNextInput) {
             ControllerManager.updateControllerAxis();
             ignoreNextInput = false;
+        }
+
+        if(getShape() != previousShape) {
+            previousShape = getShape();
+            rigidBody.setCollisionShape((CollisionShape) previousShape);
         }
 
         ControllerManager.updateControllerAxis();
@@ -159,12 +165,16 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
     private float getMass() {
         return ModConfig.INSTANCE.droneConfig.getCurrentDrone().mass;
     }
-
     private float getDragCoefficient() {
         return ModConfig.INSTANCE.droneConfig.getCurrentDrone().dragCoefficient;
     }
     private MinecraftShape getShape() {
+        var width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
+        var height = ModConfig.INSTANCE.droneConfig.getCurrentDrone().height;
         return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));
+    }
+    public int getCameraAngle() {
+        return ModConfig.INSTANCE.droneConfig.getCurrentDrone().cameraAngle;
     }
 
     public void rotate(float x, float y, float z) {

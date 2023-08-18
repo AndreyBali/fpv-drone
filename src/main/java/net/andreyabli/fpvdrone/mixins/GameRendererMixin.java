@@ -8,13 +8,12 @@ import net.andreyabli.fpvdrone.util.FreeCamera;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -29,7 +28,7 @@ public class GameRendererMixin {
         }
     }
 
-    @Shadow private Camera camera;
+    @Shadow @Final private Camera camera;
 
 
     @Inject(method = "renderWorld", at = @At(
@@ -42,7 +41,7 @@ public class GameRendererMixin {
         if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
             var q = freeCamera.getRotation(tickDelta);
             q.set(q.getX(), -q.getY(), q.getZ(), -q.getW());
-            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), freeCamera.CAMERA_ANGLE)));
+            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), freeCamera.getCameraAngle())));
 
             var newMat = Convert.toMinecraft(q).get(new Matrix4f());
             newMat.transpose();
