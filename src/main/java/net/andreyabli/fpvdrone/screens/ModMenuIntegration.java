@@ -1,8 +1,7 @@
-package net.andreyabli.fpvdrone.config;
+package net.andreyabli.fpvdrone.screens;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -11,7 +10,6 @@ public class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-//        return parent -> AutoConfig.getConfigScreen(ModConfig.class, parent).get();
-        return ControllerSetupScreen::new;
+        return WelcomeScreen::new;
     }
 }

@@ -61,5 +61,12 @@
   "text.autoconfig.fpvdrone.option.Drone.dragCoefficient": "Drag coefficient",
   "text.autoconfig.fpvdrone.option.Drone.thrust": "Thrust",
   "text.autoconfig.fpvdrone.option.Drone.thrustCurve": "Thrust curve",
-  "text.autoconfig.fpvdrone.option.Drone.cameraAngle": "Camera angle"
+  "text.autoconfig.fpvdrone.option.Drone.cameraAngle": "Camera angle",
+
+
+  "fpvdrone.config.deviceButton": "Select controller...",
+  "fpvdrone.config.droneButton": "Next drone",
+
+  "fpvdrone.config": "Open config",
+  "fpvdrone.config.wizard": "Calibration wizard"
 }

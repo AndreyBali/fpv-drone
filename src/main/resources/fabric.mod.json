@@ -18,7 +18,7 @@
       "net.andreyabli.fpvdrone.Freecam"
     ],
     "modmenu": [
-      "net.andreyabli.fpvdrone.config.ModMenuIntegration"
+      "net.andreyabli.fpvdrone.screens.ModMenuIntegration"
     ]
   },
   "mixins": [

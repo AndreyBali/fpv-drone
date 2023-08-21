@@ -70,7 +70,7 @@ public class Freecam implements ClientModInitializer {
         MC.setCameraEntity(freeCamera);
 
         if (ModConfig.INSTANCE.notification.notifyFreecam) {
-            MC.player.sendMessage(Text.translatable("msg.freecam.enable"), true);
+            MC.player.sendMessage(Text.translatable("msg.fpvdrone.enable"), true);
         }
     }
 
@@ -84,7 +84,7 @@ public class Freecam implements ClientModInitializer {
 
         if (MC.player != null) {
             if (ModConfig.INSTANCE.notification.notifyFreecam) {
-                MC.player.sendMessage(Text.translatable("msg.freecam.disable"), true);
+                MC.player.sendMessage(Text.translatable("msg.fpvdrone.disable"), true);
             }
         }
     }
