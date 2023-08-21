@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.glfwGetJoystickAxes;
-
 public class ControllerManager {
 
     public static void init(ModConfig config) {
@@ -52,20 +50,23 @@ public class ControllerManager {
             updateControllers();
             nextControllerCheck = System.currentTimeMillis() + 500;
         }
+        Integer jId = controllerIds.get(config.controls.device);
+        if(jId == null || !GLFW.glfwJoystickPresent(jId)) {
+            updateControllers();
+            jId = controllerIds.get(config.controls.device);
+        }
         if (config.controls.device.equals("keyboard")) {
             handleKeyboardInput();
             return;
         }
-        if(controllerIds.get(config.controls.device) == null) updateControllers();
-        int jId = controllerIds.get(config.controls.device);
-        if(!GLFW.glfwJoystickPresent(jId)) {
-            updateControllers();
-            jId = controllerIds.get(config.controls.device);
-        }
-        throttle = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.throttle) * (config.controls.controller.invertThrottle ? -1 : 1);
-        roll = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.roll) * (config.controls.controller.invertRoll ? -1 : 1);
-        pitch = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.pitch) * (config.controls.controller.invertPitch ? -1 : 1);
-        yaw = GLFW.glfwGetJoystickAxes(jId).get(config.controls.controller.yaw) * (config.controls.controller.invertYaw ? -1 : 1);
+
+        float[] axes = GLFW.glfwGetJoystickAxes(jId).array();
+        int len = axes.length;
+
+        throttle = axes[config.controls.controller.throttle > len ? len-1 : config.controls.controller.throttle] * (config.controls.controller.invertThrottle ? -1 : 1);
+        roll =     axes[config.controls.controller.roll     > len ? len-1 : config.controls.controller.roll]     * (config.controls.controller.invertRoll ? -1 : 1);
+        pitch =    axes[config.controls.controller.pitch    > len ? len-1 : config.controls.controller.pitch]    * (config.controls.controller.invertPitch ? -1 : 1);
+        yaw =      axes[config.controls.controller.yaw      > len ? len-1 : config.controls.controller.yaw]      * (config.controls.controller.invertYaw ? -1 : 1);
     }
 
 
@@ -99,7 +100,7 @@ public class ControllerManager {
         if (config.controls.device.equals("keyboard")) return null;
         int jId = controllerIds.get(config.controls.device);
         if(!GLFW.glfwJoystickPresent(jId)) return null;
-        return glfwGetJoystickAxes(jId).duplicate();
+        return GLFW.glfwGetJoystickAxes(jId).duplicate();
     }
 
     public static String thisOrDefault(String controllerName) {
