@@ -29,9 +29,9 @@ import org.joml.Quaternionf;
 
 import java.util.UUID;
 
-import static net.andreyabli.fpvdrone.Freecam.MC;
+import static net.andreyabli.fpvdrone.Main.MC;
 
-public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsElement {
+public class DroneEntity extends ClientPlayerEntity implements EntityPhysicsElement {
     private final EntityRigidBody rigidBody;
     private boolean ignoreNextInput = false;
     private MinecraftShape previousShape;
@@ -41,13 +41,13 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
 //    private final ReplayModHelper replayModHelper = new ReplayModHelper();
 
 
-    private static final ClientPlayNetworkHandler NETWORK_HANDLER = new ClientPlayNetworkHandler(MC, MC.currentScreen, MC.getNetworkHandler().getConnection(), MC.getCurrentServerEntry(), new GameProfile(UUID.randomUUID(), "FreeCamera"), MC.getTelemetryManager().createWorldSession(false, null, null)) {
+    private static final ClientPlayNetworkHandler NETWORK_HANDLER = new ClientPlayNetworkHandler(MC, MC.currentScreen, MC.getNetworkHandler().getConnection(), MC.getCurrentServerEntry(), new GameProfile(UUID.randomUUID(), "Drone"), MC.getTelemetryManager().createWorldSession(false, null, null)) {
         @Override
         public void sendPacket(Packet<?> packet) {
         }
     };
 
-    public FreeCamera() {
+    public DroneEntity() {
         super(MC, MC.world, NETWORK_HANDLER, MC.player.getStatHandler(), MC.player.getRecipeBook(), false, false);
         var position = MC.player.getPos();
         setId(-480);
@@ -143,7 +143,7 @@ public class FreeCamera extends ClientPlayerEntity implements EntityPhysicsEleme
         if (Float.isFinite(thrust.length())) {
             getRigidBody().applyCentralForce(thrust.add(yawThrust).multLocal(-1));
         } else {
-            FreeCamera.LOGGER.warn("Infinite thrust force!");
+            DroneEntity.LOGGER.warn("Infinite thrust force!");
         }
 
 //        if (ModConfig.INSTANCE.droneConfig.replayMod.record) {

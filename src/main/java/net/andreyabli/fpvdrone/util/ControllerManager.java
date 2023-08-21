@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.util;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.client.Mouse;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import org.lwjgl.glfw.GLFW;
@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.glfwGetJoystickAxes;
-import static org.lwjgl.glfw.GLFW.glfwJoystickPresent;
 
 public class ControllerManager {
 
@@ -74,19 +73,19 @@ public class ControllerManager {
     private static float lastMouseY = 0;
 
     private static void handleKeyboardInput() {
-        if(Freecam.MC.options.forwardKey.isPressed()) throttle = config.controls.keyboard.forwardKeyThrottle;
-        else if(Freecam.MC.options.backKey.isPressed()) throttle = config.controls.keyboard.backKeyThrottle;
+        if(Main.MC.options.forwardKey.isPressed()) throttle = config.controls.keyboard.forwardKeyThrottle;
+        else if(Main.MC.options.backKey.isPressed()) throttle = config.controls.keyboard.backKeyThrottle;
         else throttle = 0;
 
-        if(Freecam.MC.options.rightKey.isPressed()) yaw = config.controls.keyboard.rightKeyYaw;
-        else if(Freecam.MC.options.leftKey.isPressed()) yaw = config.controls.keyboard.leftKeyYaw;
+        if(Main.MC.options.rightKey.isPressed()) yaw = config.controls.keyboard.rightKeyYaw;
+        else if(Main.MC.options.leftKey.isPressed()) yaw = config.controls.keyboard.leftKeyYaw;
         else yaw = 0;
 
-        if(Freecam.MC.currentScreen == null) {
-            Mouse mouse = Freecam.MC.mouse;
+        if(Main.MC.currentScreen == null) {
+            Mouse mouse = Main.MC.mouse;
             float mouseX = (float) mouse.getX();
             float mouseY = (float) mouse.getY();
-            float sensitivity = Freecam.MC.options.getMouseSensitivity().getValue().floatValue();
+            float sensitivity = Main.MC.options.getMouseSensitivity().getValue().floatValue();
 
             roll =  (mouseX - lastMouseX) * sensitivity * 0.01f;
             pitch = (mouseY - lastMouseY) * sensitivity * 0.01f * (config.controls.invertMousePitchWhileFlying ? -1 : 1);

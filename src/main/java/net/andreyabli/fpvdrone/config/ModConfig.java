@@ -8,7 +8,7 @@ import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.util.Utils;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.andreyabli.fpvdrone.util.ControllerManager;
 import net.minecraft.text.Text;
 
@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.*;
 
-@Config(name = Freecam.MOD_ID)
+@Config(name = Main.MOD_ID)
 public class ModConfig implements ConfigData {
 
     @ConfigEntry.Gui.Excluded

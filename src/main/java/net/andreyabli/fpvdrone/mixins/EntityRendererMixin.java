@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -17,7 +17,7 @@ public class EntityRendererMixin {
     // Prevent rendering of nametag in inventory screen
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(Entity entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        if (Freecam.isEnabled() && !((EntityRenderDispatcherAccessor) Freecam.MC.getEntityRenderDispatcher()).getRenderShadows()) {
+        if (Main.isEnabled() && !((EntityRenderDispatcherAccessor) Main.MC.getEntityRenderDispatcher()).getRenderShadows()) {
             ci.cancel();
         }
     }

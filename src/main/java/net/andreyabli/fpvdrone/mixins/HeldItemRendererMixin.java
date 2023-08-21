@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.HeldItemRenderer;
@@ -19,8 +19,8 @@ public class HeldItemRendererMixin {
     // Makes arm movement depend upon FreeCamera movement rather than player movement.
     @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At("HEAD"), argsOnly = true)
     private ClientPlayerEntity onRenderItem(ClientPlayerEntity player) {
-        if (Freecam.isEnabled()) {
-            return Freecam.getFreeCamera();
+        if (Main.isEnabled()) {
+            return Main.getDrone();
         }
         return player;
     }
@@ -33,8 +33,8 @@ public class HeldItemRendererMixin {
     // Makes arm shading depend upon FreeCamera position rather than player position.
     @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At("HEAD"), argsOnly = true)
     private int onRenderItem2(int light) {
-        if (Freecam.isEnabled()) {
-            return Freecam.MC.getEntityRenderDispatcher().getLight(Freecam.getFreeCamera(), tickDelta);
+        if (Main.isEnabled()) {
+            return Main.MC.getEntityRenderDispatcher().getLight(Main.getDrone(), tickDelta);
         }
         return light;
     }

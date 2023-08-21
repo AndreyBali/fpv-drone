@@ -13,22 +13,22 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import net.andreyabli.fpvdrone.util.ControllerManager;
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.util.DroneEntity;
 import org.lwjgl.glfw.GLFW;
 
 import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL;
 
-public class Freecam implements ClientModInitializer {
+public class Main implements ClientModInitializer {
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     public static final String MOD_ID = "fpvdrone";
-    private static KeyBinding freecamBind;
+    private static KeyBinding droneBind;
     private static KeyBinding configGuiBind;
-    private static boolean freecamEnabled = false;
+    private static boolean droneEnabled = false;
     private static boolean playerControlEnabled = false;
     private static boolean disableNextTick = false;
-    private static FreeCamera freeCamera;
+    private static DroneEntity droneEntity;
     private static Perspective rememberedF5 = null;
 //    public static long joinTime = 0;
 
@@ -36,13 +36,13 @@ public class Freecam implements ClientModInitializer {
     public void onInitializeClient() {
         ModConfig.init();
         ControllerManager.init(ModConfig.INSTANCE);
-        freecamBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        droneBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.fpvdrone.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, "category.fpvdrone.freecam"));
         configGuiBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.fpvdrone.configGui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.fpvdrone.freecam"));
 //        ClientPlayConnectionEvents.INIT.register((handler, client) -> joinTime = System.currentTimeMillis());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (freecamBind.wasPressed()) {
+            while (droneBind.wasPressed()) {
                 toggle();
             }
             while (configGuiBind.wasPressed()) {
@@ -52,22 +52,22 @@ public class Freecam implements ClientModInitializer {
     }
 
     public static void toggle() {
-        if (freecamEnabled) {
-            onDisableFreecam();
+        if (droneEnabled) {
+            onDisableDrone();
         } else {
-            onEnableFreecam();
+            onEnableDrone();
         }
-        freecamEnabled = !freecamEnabled;
-        if (!freecamEnabled) {
+        droneEnabled = !droneEnabled;
+        if (!droneEnabled) {
             onDisabled();
         }
     }
 
-    private static void onEnableFreecam() {
+    private static void onEnableDrone() {
         onEnable();
-        freeCamera = new FreeCamera();
-        freeCamera.spawn();
-        MC.setCameraEntity(freeCamera);
+        droneEntity = new DroneEntity();
+        droneEntity.spawn();
+        MC.setCameraEntity(droneEntity);
 
         if (ModConfig.INSTANCE.notification.notifyFreecam) {
             MC.player.sendMessage(Text.translatable("msg.fpvdrone.enable"), true);
@@ -79,7 +79,7 @@ public class Freecam implements ClientModInitializer {
         return true;
     }
 
-    private static void onDisableFreecam() {
+    private static void onDisableDrone() {
         onDisable();
 
         if (MC.player != null) {
@@ -104,9 +104,9 @@ public class Freecam implements ClientModInitializer {
         MC.gameRenderer.setRenderHand(true);
         MC.setCameraEntity(MC.player);
         playerControlEnabled = false;
-        freeCamera.despawn();
-        freeCamera.input = new Input();
-        freeCamera = null;
+        droneEntity.despawn();
+        droneEntity.input = new Input();
+        droneEntity = null;
 
         if (MC.player != null) {
             MC.player.input = new KeyboardInput(MC.options);
@@ -119,8 +119,8 @@ public class Freecam implements ClientModInitializer {
         }
     }
 
-    public static FreeCamera getFreeCamera() {
-        return freeCamera;
+    public static DroneEntity getDrone() {
+        return droneEntity;
     }
 
     public static boolean disableNextTick() {
@@ -132,7 +132,7 @@ public class Freecam implements ClientModInitializer {
     }
 
     public static boolean isEnabled() {
-        return freecamEnabled;
+        return droneEnabled;
     }
 
     public static boolean isPlayerControlEnabled() {

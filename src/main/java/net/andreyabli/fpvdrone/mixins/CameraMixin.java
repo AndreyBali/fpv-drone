@@ -2,9 +2,9 @@ package net.andreyabli.fpvdrone.mixins;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.andreyabli.fpvdrone.config.ModConfig;
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.util.DroneEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
@@ -27,9 +27,9 @@ public abstract class CameraMixin {
 
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdate(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
-        if (focusedEntity instanceof FreeCamera freeCamera) {
-            Vector3f pos = freeCamera.getPosition(tickDelta);
-            Quaternion rot = freeCamera.getRotation(tickDelta);
+        if (focusedEntity instanceof DroneEntity droneEntity) {
+            Vector3f pos = droneEntity.getPosition(tickDelta);
+            Quaternion rot = droneEntity.getRotation(tickDelta);
 
             MinecraftClient client = MinecraftClient.getInstance();
             if(inverseView) client.options.setPerspective(Perspective.FIRST_PERSON);
@@ -52,7 +52,7 @@ public abstract class CameraMixin {
     // Removes the submersion overlay when underwater, in lava, or powdered snow.
     @Inject(method = "getSubmersionType", at = @At("HEAD"), cancellable = true)
     public void onGetSubmersionType(CallbackInfoReturnable<CameraSubmersionType> cir) {
-        if (Freecam.isEnabled() && !ModConfig.INSTANCE.visual.showSubmersion) {
+        if (Main.isEnabled() && !ModConfig.INSTANCE.visual.showSubmersion) {
             cir.setReturnValue(CameraSubmersionType.NONE);
         }
     }

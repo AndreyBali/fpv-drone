@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
@@ -22,7 +22,7 @@ public class ClientPlayerInteractionManagerMixin {
     // Prevents interacting with blocks when allowInteract is disabled.
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
     private void onInteractBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
+        if (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
             cir.setReturnValue(ActionResult.PASS);
         }
     }
@@ -30,7 +30,7 @@ public class ClientPlayerInteractionManagerMixin {
     // Prevents interacting with entities when allowInteract is disabled, and prevents interacting with self.
     @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
     private void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (entity.equals(Freecam.MC.player) || (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract)) {
+        if (entity.equals(Main.MC.player) || (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract)) {
             cir.setReturnValue(ActionResult.PASS);
         }
     }
@@ -38,7 +38,7 @@ public class ClientPlayerInteractionManagerMixin {
     // Prevents interacting with entities when allowInteract is disabled, and prevents interacting with self.
     @Inject(method = "interactEntityAtLocation", at = @At("HEAD"), cancellable = true)
     private void onInteractEntityAtLocation(PlayerEntity player, Entity entity, EntityHitResult hitResult, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (entity.equals(Freecam.MC.player) || (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract)) {
+        if (entity.equals(Main.MC.player) || (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract)) {
             cir.setReturnValue(ActionResult.PASS);
         }
     }
@@ -46,7 +46,7 @@ public class ClientPlayerInteractionManagerMixin {
     // Prevents attacking self.
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo ci) {
-        if (target.equals(Freecam.MC.player)) {
+        if (target.equals(Main.MC.player)) {
             ci.cancel();
         }
     }

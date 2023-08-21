@@ -1,4 +1,4 @@
-package net.andreyabli.fpvdrone.screens;
+package net.andreyabli.fpvdrone.screens.widgets;
 
 import com.google.common.collect.ImmutableList;
 import net.andreyabli.fpvdrone.config.ModConfig;

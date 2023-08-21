@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.input.KeyboardInput;
@@ -17,17 +17,17 @@ public class MinecraftClientMixin {
     // Prevents player from being controlled when freecam is enabled.
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        if (Freecam.isEnabled()) {
-            if (Freecam.MC.player != null && Freecam.MC.player.input instanceof KeyboardInput && !Freecam.isPlayerControlEnabled()) {
+        if (Main.isEnabled()) {
+            if (Main.MC.player != null && Main.MC.player.input instanceof KeyboardInput && !Main.isPlayerControlEnabled()) {
                 Input input = new Input();
-                input.sneaking = Freecam.MC.player.input.sneaking; // Makes player continue to sneak after freecam is enabled.
-                Freecam.MC.player.input = input;
+                input.sneaking = Main.MC.player.input.sneaking; // Makes player continue to sneak after freecam is enabled.
+                Main.MC.player.input = input;
             }
-            Freecam.MC.gameRenderer.setRenderHand(ModConfig.INSTANCE.visual.showHand);
+            Main.MC.gameRenderer.setRenderHand(ModConfig.INSTANCE.visual.showHand);
 
-            if (Freecam.disableNextTick()) {
-                Freecam.toggle();
-                Freecam.setDisableNextTick(false);
+            if (Main.disableNextTick()) {
+                Main.toggle();
+                Main.setDisableNextTick(false);
             }
         }
     }
@@ -35,7 +35,7 @@ public class MinecraftClientMixin {
     // Prevents attacks when allowInteract is disabled.
     @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
-        if (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
+        if (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
             cir.cancel();
         }
     }
@@ -43,7 +43,7 @@ public class MinecraftClientMixin {
     // Prevents item pick when allowInteract is disabled.
     @Inject(method = "doItemPick", at = @At("HEAD"), cancellable = true)
     private void onDoItemPick(CallbackInfo ci) {
-        if (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
+        if (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
             ci.cancel();
         }
     }
@@ -51,7 +51,7 @@ public class MinecraftClientMixin {
     // Prevents block breaking when allowInteract is disabled.
     @Inject(method = "handleBlockBreaking", at = @At("HEAD"), cancellable = true)
     private void onHandleBlockBreaking(CallbackInfo ci) {
-        if (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
+        if (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
             ci.cancel();
         }
     }

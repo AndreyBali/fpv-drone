@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.network.ClientConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,8 +13,8 @@ public class ClientConnectionMixin {
     // Disables freecam if the player disconnects.
     @Inject(method = "handleDisconnection", at = @At("HEAD"))
     private void onHandleDisconnection(CallbackInfo ci) {
-        if (Freecam.isEnabled()) {
-            Freecam.toggle();
+        if (Main.isEnabled()) {
+            Main.toggle();
         }
     }
 }

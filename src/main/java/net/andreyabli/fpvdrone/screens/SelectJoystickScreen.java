@@ -1,6 +1,7 @@
 package net.andreyabli.fpvdrone.screens;
 
 import net.andreyabli.fpvdrone.config.ModConfig;
+import net.andreyabli.fpvdrone.screens.widgets.JoystickListWidget;
 import net.andreyabli.fpvdrone.util.ControllerManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

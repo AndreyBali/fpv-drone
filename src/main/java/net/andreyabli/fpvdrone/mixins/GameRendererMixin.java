@@ -2,9 +2,9 @@ package net.andreyabli.fpvdrone.mixins;
 
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.toolbox.api.math.QuaternionHelper;
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.andreyabli.fpvdrone.config.ModConfig;
-import net.andreyabli.fpvdrone.util.FreeCamera;
+import net.andreyabli.fpvdrone.util.DroneEntity;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,7 +23,7 @@ public class GameRendererMixin {
     // Disables block outlines when allowInteract is disabled.
     @Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
     private void onShouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir) {
-        if (Freecam.isEnabled() && !Freecam.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
+        if (Main.isEnabled() && !Main.isPlayerControlEnabled() && !ModConfig.INSTANCE.utility.allowInteract) {
             cir.setReturnValue(false);
         }
     }
@@ -38,10 +38,10 @@ public class GameRendererMixin {
             shift = At.Shift.BEFORE
     ))
     private void PostCameraUpdate(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo ci) {
-        if(camera.getFocusedEntity() instanceof FreeCamera freeCamera) {
-            var q = freeCamera.getRotation(tickDelta);
+        if(camera.getFocusedEntity() instanceof DroneEntity droneEntity) {
+            var q = droneEntity.getRotation(tickDelta);
             q.set(q.getX(), -q.getY(), q.getZ(), -q.getW());
-            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), freeCamera.getCameraAngle())));
+            q.set(Convert.toBullet(QuaternionHelper.rotateX(Convert.toMinecraft(q), droneEntity.getCameraAngle())));
 
             var newMat = Convert.toMinecraft(q).get(new Matrix4f());
             newMat.transpose();

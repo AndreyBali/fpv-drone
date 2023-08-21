@@ -1,6 +1,6 @@
 package net.andreyabli.fpvdrone.mixins;
 
-import net.andreyabli.fpvdrone.Freecam;
+import net.andreyabli.fpvdrone.Main;
 import net.minecraft.entity.LivingEntity;
 import net.andreyabli.fpvdrone.config.ModConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,9 +18,9 @@ public abstract class LivingEntityMixin {
     // Disables freecam upon receiving damage if disableOnDamage is enabled.
     @Inject(method = "setHealth", at = @At("HEAD"))
     private void onSetHealth(float health, CallbackInfo ci) {
-        if (Freecam.isEnabled() && ModConfig.INSTANCE.utility.disableOnDamage && this.equals(Freecam.MC.player)) {
-            if (!Freecam.MC.player.isCreative() && getHealth() > health) {
-                Freecam.setDisableNextTick(true);
+        if (Main.isEnabled() && ModConfig.INSTANCE.utility.disableOnDamage && this.equals(Main.MC.player)) {
+            if (!Main.MC.player.isCreative() && getHealth() > health) {
+                Main.setDisableNextTick(true);
             }
         }
     }
