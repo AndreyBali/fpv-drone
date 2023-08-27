@@ -60,13 +60,13 @@ public class ControllerManager {
             return;
         }
 
-        float[] axes = GLFW.glfwGetJoystickAxes(jId).array();
-        int len = axes.length;
+        FloatBuffer axes = GLFW.glfwGetJoystickAxes(jId);
+        int len = axes.remaining();
 
-        throttle = axes[config.controls.controller.throttle > len ? len-1 : config.controls.controller.throttle] * (config.controls.controller.invertThrottle ? -1 : 1);
-        roll =     axes[config.controls.controller.roll     > len ? len-1 : config.controls.controller.roll]     * (config.controls.controller.invertRoll ? -1 : 1);
-        pitch =    axes[config.controls.controller.pitch    > len ? len-1 : config.controls.controller.pitch]    * (config.controls.controller.invertPitch ? -1 : 1);
-        yaw =      axes[config.controls.controller.yaw      > len ? len-1 : config.controls.controller.yaw]      * (config.controls.controller.invertYaw ? -1 : 1);
+        throttle = axes.get(config.controls.controller.throttle > len ? len-1 : config.controls.controller.throttle) * (config.controls.controller.invertThrottle ? -1 : 1);
+        roll =     axes.get(config.controls.controller.roll     > len ? len-1 : config.controls.controller.roll)     * (config.controls.controller.invertRoll ? -1 : 1);
+        pitch =    axes.get(config.controls.controller.pitch    > len ? len-1 : config.controls.controller.pitch)    * (config.controls.controller.invertPitch ? -1 : 1);
+        yaw =      axes.get(config.controls.controller.yaw      > len ? len-1 : config.controls.controller.yaw)      * (config.controls.controller.invertYaw ? -1 : 1);
     }
 
 

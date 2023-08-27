@@ -18,7 +18,7 @@ public class GuiUtils {
 
         // Draw stick positions
         int dotSize = 3;
-        int yawAdjusted = (int) (yaw * scale);
+        int yawAdjusted = (int) (yaw * -1 * scale);
         int throttleAdjusted = (int) (throttle * scale);
         int rollAdjusted = (int) (roll * scale);
         int pitchAdjusted = (int) (pitch * scale);

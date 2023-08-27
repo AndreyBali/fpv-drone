@@ -85,4 +85,8 @@ public class SelectJoystickScreen extends Screen {
     public void close() {
         client.setScreen(parent);
     }
+
+    public Screen getParent() {
+        return parent;
+    }
 }

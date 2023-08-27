@@ -7,56 +7,68 @@ import net.andreyabli.fpvdrone.util.GuiUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
 public class ControllerTestScreen extends Screen {
 
     private final Screen parent;
     private ButtonWidget saveButton;
-    private ButtonWidget cancelButton;
-    private ButtonWidget configButton;
+    private ButtonWidget backButton;
+    private ButtonWidget calibrateButton;
+
     public ControllerTestScreen(Screen parent) {
         super(Text.translatable("fpvdrone.config.controller_setup.title"));
         this.parent = parent;
+        ControllerManager.updateControllers();
     }
 
     @Override
     public void init() {
         var spacing = 10;
-        var bWidth = 60;
+        var bWidth = 80;
         var bHeight = 20;
 
-        this.saveButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.controller_setup.save"), this::onSaveButton)
+        this.backButton = ButtonWidget.builder(ScreenTexts.BACK, button -> this.client.setScreen(this.parent))
                 .position(spacing, height - bHeight - spacing)
                 .size(bWidth, bHeight)
                 .build();
 
-        this.cancelButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.controller_setup.cancel"), this::onCancelButton)
-                .position(spacing + bWidth + spacing / 2, height - bHeight - spacing)
-                .size(bWidth, bHeight)
+        this.calibrateButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.wizard"), this::onCalibrateButton)
+                .position(spacing*2 + bWidth, height - bHeight - spacing)
+                .size(120, bHeight)
                 .build();
 
-        this.configButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.controller_setup.config"), this::onConfigButton)
+        this.saveButton = ButtonWidget.builder(ScreenTexts.DONE, this::onSaveButton)
                 .position(width - spacing - bWidth, height - bHeight - spacing)
                 .size(bWidth, bHeight)
                 .build();
 
         this.addDrawableChild(this.saveButton);
-        this.addDrawableChild(this.cancelButton);
-        this.addDrawableChild(this.configButton);
+        this.addDrawableChild(this.calibrateButton);
+        this.addDrawableChild(this.backButton);
     }
 
     private void onSaveButton(ButtonWidget button) {
         AutoConfig.getConfigHolder(ModConfig.class).save();
-        this.client.setScreen(this.parent);
+        if (parent instanceof ControllerSetupScreen css){
+            if (css.getParent() instanceof SelectJoystickScreen sjs){
+                this.client.setScreen(sjs.getParent());
+                return;
+            }
+        }
+        this.client.setScreen(new WelcomeScreen(null));
     }
 
-    private void onCancelButton(ButtonWidget button) {
-        this.client.setScreen(this.parent);
-    }
-
-    private void onConfigButton(ButtonWidget button) {
-        this.client.setScreen(AutoConfig.getConfigScreen(ModConfig.class, parent).get());
+    private void onCalibrateButton(ButtonWidget button) {
+        if (parent instanceof ControllerSetupScreen css){
+            if (css.getParent() instanceof SelectJoystickScreen sjs){
+                this.client.setScreen(sjs);
+                return;
+            }
+        }
+        this.client.setScreen(new SelectJoystickScreen(null, false,
+                sjs -> this.client.setScreen(new ControllerSetupScreen(sjs))));
     }
 
     @Override
@@ -68,6 +80,9 @@ public class ControllerTestScreen extends Screen {
         var roll = ControllerManager.roll;
         var throttle = ControllerManager.throttle;
         GuiUtils.renderSticks(context, delta, width / 2, height / 2 + 20, 40, 10, pitch, yaw, roll, throttle);
+
+        context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("fpvdrone.config.controller_setup.is_working"), this.width / 2, this.height / 2 - 50, 16777215);
+
         super.render(context, mouseX, mouseY, delta);
     }
     @Override

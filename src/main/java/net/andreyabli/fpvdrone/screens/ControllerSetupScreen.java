@@ -71,7 +71,7 @@ public class ControllerSetupScreen extends Screen {
             }
             case YAW -> {
                 controllerConfig.yaw = axis;
-                controllerConfig.invertYaw = invertAxis;
+                controllerConfig.invertYaw = !invertAxis; // to invert yaw
             }
             case PITCH -> {
                 controllerConfig.pitch = axis;
@@ -113,7 +113,10 @@ public class ControllerSetupScreen extends Screen {
                 this.axisConsumer = null;
                 this.backButton.active = true;
                 this.nextButton.active = true;
-                if(stage != Stage.ROLL) centerSticksStage = true; //dont show center sticks animation on the last step
+                centerSticksStage = true;
+                if(stage == Stage.ROLL) {
+                    this.client.setScreen(new ControllerTestScreen(this));
+                }
                 break;
             }
         }
@@ -156,11 +159,11 @@ public class ControllerSetupScreen extends Screen {
             throttle = y;
             yaw = x;
             pitch = y;
-            roll = -x;
+            roll = x;
         } else {
             switch (stage) {
                 case THROTTLE -> throttle = progress;
-                case YAW -> yaw = progress;
+                case YAW -> yaw = -progress;
                 case PITCH -> pitch = progress;
                 case ROLL -> roll = progress;
             }
@@ -179,5 +182,9 @@ public class ControllerSetupScreen extends Screen {
     @Override
     public void close() {
         client.setScreen(parent);
+    }
+
+    public Screen getParent() {
+        return parent;
     }
 }

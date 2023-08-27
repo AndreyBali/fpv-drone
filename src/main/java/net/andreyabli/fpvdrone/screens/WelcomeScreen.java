@@ -21,6 +21,7 @@ public class WelcomeScreen extends Screen {
     private ButtonWidget configButton;
     private ButtonWidget droneButton;
     private ButtonWidget deviceButton;
+    private ButtonWidget testDeviceButton;
     @Override
     public void init() {
         var spacing = 10;
@@ -44,13 +45,31 @@ public class WelcomeScreen extends Screen {
                 .size(bWidth, bHeight)
                 .build();
 
+        this.testDeviceButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.testButton"), this::onTestDeviceButton)
+                .position((width - bWidth)/2 - 75, height/2 + spacing + bHeight)
+                .size(bWidth, bHeight)
+                .build();
+
         this.droneButton = ButtonWidget.builder(Text.translatable("fpvdrone.config.droneButton"), this::onDroneButton)
                 .position((width - bWidth)/2 + 75, height/2 + spacing)
                 .size(bWidth, bHeight)
                 .build();
 
         this.addDrawableChild(this.deviceButton);
+        this.addDrawableChild(this.testDeviceButton);
         this.addDrawableChild(this.droneButton);
+    }
+
+    private void onTestDeviceButton(ButtonWidget button){
+        ControllerManager.updateControllers();
+
+        if(ModConfig.INSTANCE.controls.device.equals("keyboard")){
+            client.setScreen(new SelectJoystickScreen(this, false, sjs -> {
+                client.setScreen(new ControllerTestScreen(sjs));
+            }));
+        } else {
+            client.setScreen(new ControllerTestScreen(this));
+        }
     }
 
     private void onDroneButton(ButtonWidget button){

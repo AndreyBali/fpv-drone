@@ -68,5 +68,6 @@
   "fpvdrone.config.droneButton": "Next drone",
 
   "fpvdrone.config": "Open config",
-  "fpvdrone.config.wizard": "Calibration wizard"
+  "fpvdrone.config.wizard": "Calibration wizard",
+  "fpvdrone.config.testButton": "Test..."
 }
