@@ -88,16 +88,16 @@ public class DroneEntity extends ClientPlayerEntity implements EntityPhysicsElem
         }
         rigidBody.setMass(getMass());
 
-        if(MC.player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
-            MC.player.copyPositionAndRotation(this);
+        if (MC.player.getAbilities().allowFlying && ModConfig.INSTANCE.utility.flyAsPlayer) {
+            MC.player.refreshPositionAndAngles(this.getX(), this.getY()+3, this.getZ(), getYaw(), 0);
         }
 
-        if(ignoreNextInput) {
+        if (ignoreNextInput) {
             ControllerManager.updateControllerAxis();
             ignoreNextInput = false;
         }
 
-        if(getShape() != previousShape) {
+        if (getShape() != previousShape) {
             previousShape = getShape();
             rigidBody.setCollisionShape((CollisionShape) previousShape);
         }
@@ -165,14 +165,17 @@ public class DroneEntity extends ClientPlayerEntity implements EntityPhysicsElem
     private float getMass() {
         return ModConfig.INSTANCE.droneConfig.getCurrentDrone().mass;
     }
+
     private float getDragCoefficient() {
         return ModConfig.INSTANCE.droneConfig.getCurrentDrone().dragCoefficient;
     }
+
     private MinecraftShape getShape() {
         var width = ModConfig.INSTANCE.droneConfig.getCurrentDrone().width;
         var height = ModConfig.INSTANCE.droneConfig.getCurrentDrone().height;
         return MinecraftShape.convex(new Box(0, 0, 0, width, height, width));
     }
+
     public int getCameraAngle() {
         return ModConfig.INSTANCE.droneConfig.getCurrentDrone().cameraAngle;
     }
@@ -207,6 +210,7 @@ public class DroneEntity extends ClientPlayerEntity implements EntityPhysicsElem
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
     }
+
     // Ensures that the FreeCamera is always in the swimming pose.
     @Override
     public void setPose(EntityPose pose) {
